@@ -1,4 +1,5 @@
 const $=s=>document.querySelector(s);
+const TEACHER_PIN='212224';
 let activeRoom='';
 let pollId=null;
 let unsubscribe=()=>{};
@@ -80,9 +81,22 @@ function renderTeams(teams){
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function fullscreen(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen();else if(document.exitFullscreen)document.exitFullscreen();}
 
-$('#teacherJoinForm').addEventListener('submit',e=>{e.preventDefault();openRoom($('#teacherRoomCode').value);});
+$('#teacherJoinForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const pin=$('#teacherAccessCode').value.trim();
+  const err=$('#teacherAccessError');
+  if(pin!==TEACHER_PIN){
+    err.style.display='block';
+    $('#teacherAccessCode').value='';
+    $('#teacherAccessCode').focus();
+    return;
+  }
+  err.style.display='none';
+  openRoom($('#teacherRoomCode').value);
+});
+$('#teacherAccessCode').addEventListener('input',()=>$('#teacherAccessError').style.display='none');
 $('#refreshBtn').addEventListener('click',refreshTeams);
 $('#teacherFullscreenBtn').addEventListener('click',fullscreen);
 setModeNote();
 const initial=new URLSearchParams(location.search).get('room');
-if(initial)openRoom(initial);
+if(initial)$('#teacherRoomCode').value=cleanCode(initial);
