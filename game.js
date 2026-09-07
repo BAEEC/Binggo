@@ -8,6 +8,7 @@ let sessionId = '';
 let hp = 100;
 let qIndex = 0;
 let timerId = null;
+let tickTimerId = null;
 let timeLeft = 30;
 let answered = false;
 let finished = false;
@@ -37,7 +38,7 @@ const Sound = {
     osc.type = type;
     osc.frequency.setValueAtTime(freq, t);
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(volume, t + .015);
+    gain.gain.exponentialRampToValueAtTime(volume, t + .012);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
     osc.connect(gain); gain.connect(this.ctx.destination);
     osc.start(t); osc.stop(t + duration + .03);
@@ -46,7 +47,13 @@ const Sound = {
   good(){ [523,659,784].forEach((f,i)=>this.tone(f,.13,'sine',.04,i*.08)); },
   mid(){ this.tone(440,.12,'triangle',.035); this.tone(330,.18,'triangle',.035,.10); },
   bad(){ this.tone(190,.16,'sawtooth',.035); this.tone(125,.28,'sawtooth',.04,.11); },
-  tick(){ this.tone(880,.055,'square',.018); },
+  tick(intensity=0){
+    const freq = 610 + Math.round(intensity * 520);
+    const volume = .018 + intensity * .014;
+    const duration = intensity>.7 ? .045 : .055;
+    this.tone(freq,duration,'square',volume);
+    if(intensity>.55) this.tone(freq+110,.035,'square',Math.max(.015,volume-.006),.075);
+  },
   win(){ [523,659,784,1046].forEach((f,i)=>this.tone(f,.18,'sine',.045,i*.10)); },
   bankrupt(){ [220,175,130,95].forEach((f,i)=>this.tone(f,.22,'sawtooth',.04,i*.12)); }
 };
@@ -232,18 +239,32 @@ function finishGame(reason='survived'){
   renderHistory(); show('result'); saveSnapshot(bankrupt?'bankrupt':'survived');
 }
 
+function scheduleTick(){
+  if(tickTimerId){ clearTimeout(tickTimerId); tickTimerId=null; }
+  if(!soundEnabled || answered || finished || timeLeft<=0 || !screens.game.classList.contains('active')) return;
+  let interval=1150, intensity=0;
+  if(timeLeft<=20){ interval=780; intensity=.28; }
+  if(timeLeft<=10){ interval=470; intensity=.62; }
+  if(timeLeft<=5){ interval=245; intensity=1; }
+  Sound.tick(intensity);
+  tickTimerId=setTimeout(scheduleTick,interval);
+}
+
 function startTimer(){
   clearTimer();
+  scheduleTick();
   timerId=setInterval(()=>{
     timeLeft--; $('#timerText').textContent=String(timeLeft);
     const pct=Math.max(0,(timeLeft/30)*100); $('#timerBar').style.width=`${pct}%`;
     if(timeLeft<=10) $('#timerBar').className='timer-bar danger'; else if(timeLeft<=20) $('#timerBar').className='timer-bar warning';
-    if(timeLeft<=5 && timeLeft>0) Sound.tick();
     if(timeLeft<=0) timeoutAnswer();
   },1000);
 }
 
-function clearTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
+function clearTimer(){
+  if(timerId){ clearInterval(timerId); timerId=null; }
+  if(tickTimerId){ clearTimeout(tickTimerId); tickTimerId=null; }
+}
 
 function resetGame(){
   if(screens.join.classList.contains('active')) return;
@@ -257,8 +278,15 @@ function fullscreen(){
 }
 
 function toggleSound(){
-  soundEnabled=!soundEnabled; $('#soundBtn').textContent=soundEnabled?'🔊 เสียง: เปิด':'🔇 เสียง: ปิด'; $('#soundBtn').setAttribute('aria-pressed',String(soundEnabled));
-  if(soundEnabled){Sound.init();Sound.tap();}
+  soundEnabled=!soundEnabled;
+  $('#soundBtn').textContent=soundEnabled?'🔊 เสียง: เปิด':'🔇 เสียง: ปิด';
+  $('#soundBtn').setAttribute('aria-pressed',String(soundEnabled));
+  if(soundEnabled){
+    Sound.init(); Sound.tap();
+    if(screens.game.classList.contains('active') && !answered && !finished) scheduleTick();
+  }else if(tickTimerId){
+    clearTimeout(tickTimerId); tickTimerId=null;
+  }
 }
 
 $('#joinForm').addEventListener('submit',joinGame);
