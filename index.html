@@ -3,15 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101C3D">
+<meta name="theme-color" content="#F2F5FA">
 <title>Business Survival — Global Shock Challenge</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="app">
 <header class="topbar">
-  <div class="brand"><div class="brandmark">MGT</div><div><b>BUSINESS SURVIVAL</b><small>Global Shock Challenge</small></div></div>
-  <div class="top-actions"><button id="fullscreenBtn" type="button">⛶ เต็มจอ</button><button id="resetBtn" type="button">↻ ออกจากเกม</button></div>
+  <a class="brand" href="./" aria-label="Business Survival"><div class="brandmark">MGT</div><div><b>BUSINESS SURVIVAL</b><small>Global Shock Challenge</small></div></a>
+  <div class="top-actions">
+    <button id="soundBtn" type="button" aria-pressed="true">🔊 เสียง: เปิด</button>
+    <button id="fullscreenBtn" type="button">⛶ เต็มจอ</button>
+    <a class="teacher-link" href="teacher.html">โหมดผู้สอน</a>
+    <button id="resetBtn" type="button">↻ ออกจากเกม</button>
+  </div>
 </header>
 
 <main class="main">
@@ -21,15 +26,13 @@
       <span class="eyebrow">⚡ TEAM CHALLENGE</span>
       <h1>BUSINESS<br><span>SURVIVAL</span></h1>
       <h2>โลกโยนปัญหามา ธุรกิจคุณจะรอดไหม?</h2>
-      <p>ตัวแทนทีมเข้าห้องเกม ตั้งชื่อทีม แล้วช่วยกันตัดสินใจให้ธุรกิจรอดจาก Global Shock ทั้ง 20 ด่าน</p>
-      <div class="mini-rules">
-        <span>❤️ เริ่ม 100 HP</span><span>⏱️ 30 วินาที/ข้อ</span><span>💥 ตอบพลาด = เสีย HP</span>
-      </div>
+      <p>1 เครื่องต่อ 1 ทีม ตัวแทนทีมเข้าห้องเกม ตั้งชื่อทีม แล้วช่วยกันตัดสินใจให้ธุรกิจรอดจาก Global Shock ทั้ง 20 ด่าน</p>
+      <div class="mini-rules"><span>❤️ เริ่ม 100 HP</span><span>⏱️ 30 วินาที/ข้อ</span><span>💥 ตอบพลาด = เสีย HP</span><span>🔀 ลำดับคำถามสุ่ม</span></div>
     </div>
     <div class="join-card card">
       <div class="join-icon">🎮</div>
       <h2>เข้าห้องเกม</h2>
-      <p>ใช้ 1 เครื่องต่อ 1 ทีม</p>
+      <p>ให้ตัวแทนกลุ่มกรอกข้อมูล แล้วส่งเครื่องให้สมาชิกช่วยกันคิด</p>
       <form id="joinForm">
         <label for="teamName">ชื่อทีม</label>
         <input id="teamName" maxlength="28" autocomplete="off" placeholder="เช่น TEAM ROCKET" required>
@@ -44,15 +47,20 @@
 
 <section id="gameScreen" class="screen">
   <div class="player-strip card">
-    <div class="identity"><span class="room-label">ROOM <b id="roomDisplay"></b></span><h3 id="teamDisplay"></h3></div>
-    <div class="hp-panel"><div class="hp-head"><span>❤️ พลังธุรกิจ</span><strong id="hpText">100 HP</strong></div><div class="hpbar large"><div id="hpFill" class="hpfill" style="width:100%"></div></div><small id="hpStatus">BUSINESS ACTIVE</small></div>
+    <div class="identity">
+      <span class="room-label">ROOM <b id="roomDisplay"></b></span>
+      <h3 id="teamDisplay"></h3>
+      <small id="syncBadge" class="sync-badge">● กำลังเชื่อมต่อห้อง</small>
+    </div>
+    <div class="hp-panel">
+      <div class="hp-head"><span>❤️ พลังชีวิตของธุรกิจคุณ</span><strong id="hpText">100 HP</strong></div>
+      <div class="hpbar large"><div id="hpFill" class="hpfill" style="width:100%"></div></div>
+      <small id="hpStatus">BUSINESS ACTIVE</small>
+    </div>
   </div>
 
   <div class="question card">
-    <div class="question-head">
-      <span id="roundPill" class="pill">EVENT 01 / 20</span>
-      <span id="questionState" class="state-pill">เลือกคำตอบก่อนหมดเวลา</span>
-    </div>
+    <div class="question-head"><span id="roundPill" class="pill">EVENT 01 / 20</span><span id="questionState" class="state-pill">SAFE</span></div>
 
     <div class="timer-wrap" aria-label="เวลาคงเหลือ">
       <div class="timer-meta"><span>⏱️ เวลาคงเหลือ</span><strong><span id="timerText">30</span> วินาที</strong></div>
@@ -74,15 +82,21 @@
 
 <section id="resultScreen" class="screen">
   <div class="finish card">
-    <div class="trophy">🏆</div>
-    <span class="eyebrow">GAME COMPLETE</span>
+    <div id="finishIcon" class="trophy">🏆</div>
+    <span id="finishKicker" class="eyebrow">GAME COMPLETE</span>
     <h1 id="finishTitle">จบเกมแล้ว!</h1>
     <p>ทีม <strong id="finishTeam"></strong> · ห้อง <strong id="finishRoom"></strong></p>
     <div class="final-hp"><span>HP ที่เหลือ</span><strong id="finishHp">0</strong></div>
     <div id="finishStatus" class="finish-status"></div>
-    <p class="finish-note">แสดงหน้าจอนี้ให้ผู้สอนเพื่อเทียบคะแนนกับทีมอื่น</p>
-    <button class="primary big" id="playAgainBtn" type="button">↻ เล่นใหม่</button>
+    <p class="finish-note">คะแนนถูกบันทึกไว้สำหรับหน้าจอผู้สอนเมื่อระบบห้องออนไลน์เปิดใช้งาน</p>
   </div>
+
+  <div class="summary card">
+    <div class="summary-head"><div><span class="eyebrow">📋 DAMAGE REPORT</span><h2>สรุปแต่ละเหตุการณ์</h2></div><strong id="summaryTotal"></strong></div>
+    <div id="historyList" class="history-list"></div>
+  </div>
+
+  <div class="finish-actions"><button class="primary" id="playAgainBtn" type="button">↻ เล่นใหม่</button><a class="teacher-link button-link" id="teacherResultLink" href="teacher.html">ดูหน้าจอผู้สอน</a></div>
 </section>
 </main>
 </div>
@@ -90,18 +104,30 @@
 <div id="rulesModal" class="modal-wrap">
   <div class="modal card">
     <h2>กติกา BUSINESS SURVIVAL</h2>
-    <p>1 เครื่องต่อ 1 ทีม ช่วยกันตอบคำถาม 20 ด่าน แต่ละข้อมีเวลา 30 วินาที</p>
+    <p>1 เครื่องต่อ 1 ทีม ช่วยกันตอบ 20 สถานการณ์ แต่ละข้อมีเวลา 30 วินาที และลำดับคำถามของแต่ละทีมจะไม่เหมือนกัน</p>
     <div class="rules">
       <div>🟢 <b>NICE MOVE — 0 Damage</b><span>รับมือเหมาะสม ธุรกิจไม่เสีย HP</span></div>
       <div>🟠 <b>OUCH — -10 HP</b><span>พอทำได้ แต่ยังไม่ใช่ทางที่ดีนัก</span></div>
       <div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุด หรือไม่ตอบก่อนหมดเวลา</span></div>
-      <div>☠️ <b>0 HP = BUSINESS FAILED</b><span>ยังตอบต่อได้เพื่อเรียนรู้ให้ครบ 20 ด่าน</span></div>
+      <div>☠️ <b>0 HP = ล้มละลาย</b><span>เกมจบทันที ธุรกิจของคุณไปไม่รอด</span></div>
     </div>
     <div class="actions end"><button class="primary" id="closeRulesBtn" type="button">เข้าใจแล้ว</button></div>
   </div>
 </div>
 
+<div id="bankruptModal" class="modal-wrap danger-modal">
+  <div class="modal card bankrupt-card">
+    <div class="bankrupt-icon">☠️</div>
+    <span class="eyebrow danger-eyebrow">BUSINESS FAILED</span>
+    <h2>ล้มละลาย</h2>
+    <p>ธุรกิจของคุณไปไม่รอด พลังชีวิตเหลือ 0 HP ก่อนผ่านครบ 20 สถานการณ์</p>
+    <button class="primary big" id="bankruptSummaryBtn" type="button">ดูสรุปว่าเราเสีย HP จากอะไรบ้าง</button>
+  </div>
+</div>
+
 <script src="questions.js"></script>
+<script src="sync-config.js"></script>
+<script src="sync.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
