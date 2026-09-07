@@ -17,13 +17,16 @@
 <main class="teacher-shell">
 <section id="teacherJoin" class="teacher-join card">
   <span class="eyebrow">👩‍🏫 TEACHER MODE</span>
-  <h1>เปิดห้อง Monitor</h1>
-  <p>ใส่รหัสเดียวกับที่นักศึกษาใช้ เช่น MGT13167 เพื่อดูจำนวนทีม HP ความคืบหน้า และอันดับ</p>
+  <h1>เปิด LIVE CLASSROOM</h1>
+  <p>สำหรับผู้สอนเท่านั้น กรุณาใส่รหัสผู้สอนก่อน แล้วใส่รหัสห้องเดียวกับที่นักศึกษาใช้ เช่น MGT13167</p>
   <form id="teacherJoinForm">
-    <label for="teacherRoomCode">รหัสห้อง</label>
+    <label for="teacherAccessCode">รหัสผู้สอน</label>
+    <input id="teacherAccessCode" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="รหัส 6 หลัก" required>
+    <label for="teacherRoomCode">รหัสห้องเกม</label>
     <input id="teacherRoomCode" maxlength="20" autocomplete="off" placeholder="เช่น MGT13167" required>
     <button class="primary big" type="submit">เปิด Dashboard →</button>
   </form>
+  <p id="teacherAccessError" class="finish-note" style="display:none;background:#fff0f0;color:#a93131;font-weight:800">รหัสผู้สอนไม่ถูกต้อง กรุณาลองใหม่</p>
   <p id="backendNote" class="finish-note"></p>
 </section>
 
