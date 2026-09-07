@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#F2F5FA">
+<title>Teacher Monitor — Business Survival</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <a class="brand" href="./"><div class="brandmark">MGT</div><div><b>TEACHER MONITOR</b><small>Business Survival Live Room</small></div></a>
+  <div class="top-actions"><button id="teacherFullscreenBtn" type="button">⛶ เต็มจอ</button><a class="teacher-link" href="./">โหมดผู้เล่น</a></div>
+</header>
+
+<main class="teacher-shell">
+<section id="teacherJoin" class="teacher-join card">
+  <span class="eyebrow">👩‍🏫 TEACHER MODE</span>
+  <h1>เปิดห้อง Monitor</h1>
+  <p>ใส่รหัสเดียวกับที่นักศึกษาใช้ เช่น MGT13167 เพื่อดูจำนวนทีม HP ความคืบหน้า และอันดับ</p>
+  <form id="teacherJoinForm">
+    <label for="teacherRoomCode">รหัสห้อง</label>
+    <input id="teacherRoomCode" maxlength="20" autocomplete="off" placeholder="เช่น MGT13167" required>
+    <button class="primary big" type="submit">เปิด Dashboard →</button>
+  </form>
+  <p id="backendNote" class="finish-note"></p>
+</section>
+
+<section id="teacherDashboard" class="teacher-dashboard">
+  <div class="teacher-head">
+    <div><span class="eyebrow">LIVE CLASSROOM</span><h1>ROOM <span id="teacherRoomDisplay"></span></h1><p>อัปเดตคะแนนอัตโนมัติทุก 2 วินาที</p></div>
+    <div><span id="liveBadge" class="live-badge">● LIVE</span></div>
+  </div>
+
+  <div class="teacher-stats">
+    <div class="stat-card card"><span>ทีมทั้งหมด</span><strong id="statTeams">0</strong></div>
+    <div class="stat-card card"><span>ยังอยู่ในเกม</span><strong id="statPlaying">0</strong></div>
+    <div class="stat-card card"><span>รอดครบ 20</span><strong id="statSurvived">0</strong></div>
+    <div class="stat-card card"><span>HP สูงสุด</span><strong id="statTopHp">—</strong></div>
+  </div>
+
+  <div class="teacher-board card">
+    <div class="teacher-board-head"><div><span class="eyebrow">🏆 LEADERBOARD</span><h2>สถานะทุกทีม</h2></div><button class="top-actions" id="refreshBtn" type="button">↻ อัปเดต</button></div>
+    <div id="teacherTeamList"></div>
+  </div>
+</section>
+</main>
+</div>
+
+<script src="sync-config.js"></script>
+<script src="sync.js"></script>
+<script src="teacher.js"></script>
+</body>
+</html>
