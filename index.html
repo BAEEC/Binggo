@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101C3D">
+<title>Business Survival — Global Shock Challenge</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="brandmark">MGT</div><div><b>BUSINESS SURVIVAL</b><small>Global Shock Challenge</small></div></div>
+  <div class="top-actions"><button id="fullscreenBtn">⛶ เต็มจอ</button><button id="resetBtn">↻ เริ่มใหม่</button></div>
+</header>
+<main class="main">
+<section id="homeScreen" class="screen active">
+  <div class="hero card">
+    <div class="hero-copy">
+      <span class="eyebrow">⚡ CLASSROOM GAME</span>
+      <h1>BUSINESS<br><span>SURVIVAL</span></h1>
+      <h2>โลกโยนปัญหามา ธุรกิจคุณจะรอดไหม?</h2>
+      <p>ทุกทีมเริ่มด้วยพลังธุรกิจ 100 HP เจอเหตุการณ์ระดับโลก 20 ด่าน เลือกทางรับมือ แล้วรับผลจากการตัดสินใจ ทีมที่เหลือ HP สูงสุดคือผู้ชนะ</p>
+      <div class="actions"><button class="primary" id="goSetupBtn">เริ่มตั้งทีม →</button><button class="soft" id="rulesBtn">ดูกติกา</button></div>
+    </div>
+    <div class="hero-art"><div class="orbit"></div><div class="globe">🌍<b>20 GLOBAL SHOCKS</b></div><span class="tag t1">🇺🇸 ภาษี</span><span class="tag t2">💵 ค่าเงิน</span><span class="tag t3">🚢 ขนส่ง</span><span class="tag t4">🤖 AI</span></div>
+  </div>
+</section>
+<section id="setupScreen" class="screen">
+  <div class="setup-grid">
+    <div class="panel card"><h2>ตั้งค่าทีม</h2><p>แนะนำ 3–6 ทีม</p><label>จำนวนทีม<select id="teamCount"></select></label><div id="teamEditor"></div><div class="actions"><button class="primary" id="startGameBtn">⚡ เริ่มเกม</button><button class="soft" id="backHomeBtn">← กลับ</button></div></div>
+    <div class="panel card"><h2>กติกา</h2><div class="rules">
+      <div>❤️ <b>เริ่ม 100 HP</b><span>ทุกทีมมีพลังเท่ากัน</span></div>
+      <div>⏱️ <b>30 วินาทีต่อข้อ</b><span>คุยกันแล้วเลือก A / B / C / D</span></div>
+      <div>💥 <b>0 / -10 / -20 Damage</b><span>คำตอบเสี่ยงหรือผิดโดนดาเมจ</span></div>
+      <div>☠️ <b>0 HP = Business Failed</b><span>ยังเล่นต่อได้ แต่ขึ้นสถานะล้ม</span></div>
+      <div>🏆 <b>ครบ 20 ด่าน</b><span>HP สูงสุดชนะ</span></div>
+    </div></div>
+  </div>
+</section>
+<section id="gameScreen" class="screen">
+  <div class="game-grid">
+    <div class="question card">
+      <div class="question-head"><span id="roundPill" class="pill">EVENT 01 / 20</span><div id="timer" class="timer"><span id="timerText">30</span></div></div>
+      <div id="eventIcon" class="event-icon"></div><h2 id="questionTitle"></h2><p id="questionDesc"></p><div id="options" class="options"></div>
+      <div id="revealBanner" class="reveal"><div><b id="revealTitle"></b><span id="revealText"></span></div></div>
+      <div class="controls"><span id="statusNote">ให้แต่ละทีมเลือกคำตอบ</span><div><button class="soft" id="timerBtn">⏱ เริ่มเวลา</button><button class="pink" id="revealBtn">💥 REVEAL DAMAGE</button><button class="primary hidden" id="nextBtn">ด่านต่อไป →</button></div></div>
+    </div>
+    <aside><div class="scorebox card"><h3>❤️ พลังธุรกิจ</h3><div id="teamScores"></div></div><div class="scorebox card"><h3>🎮 วิธีตอบ</h3><p>แต่ละทีมเลือก A / B / C / D แล้วครูกดคำตอบให้ทีมนั้น ครบทุกทีมค่อยกด REVEAL</p></div></aside>
+  </div>
+</section>
+<section id="resultScreen" class="screen">
+  <div class="results-grid"><div class="panel card"><span class="eyebrow">🏁 FINAL RESULT</span><h2>ธุรกิจไหนรอดดีที่สุด?</h2><div id="rankList"></div><div class="actions"><button class="primary" id="playAgainBtn">↻ เล่นใหม่</button></div></div><div class="winner card"><div>🏆</div><small>BUSINESS SURVIVOR</small><h2 id="winnerName"></h2><p id="winnerHp"></p><div id="confetti"></div></div></div>
+</section>
+</main>
+</div>
+<div id="rulesModal" class="modal-wrap"><div class="modal card"><h2>กติกา BUSINESS SURVIVAL</h2><p>ทุกทีมเริ่ม 100 HP เลือก A/B/C/D แล้วกด Reveal เพื่อดูผลพร้อมกัน</p><div class="rules"><div>🟢 <b>NICE MOVE — 0 Damage</b><span>รับมือได้เหมาะสม</span></div><div>🟠 <b>OUCH — -10 HP</b><span>พอทำได้ แต่ยังเสี่ยง</span></div><div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุดหรือทำให้ปัญหาหนักขึ้น</span></div></div><div class="actions end"><button class="primary" id="closeRulesBtn">เข้าใจแล้ว</button></div></div></div>
+<div id="damageModal" class="modal-wrap"><div class="modal card"><h2 id="damageModalTitle">ผลการตัดสินใจ</h2><p id="damageModalExplain"></p><div id="teamResults"></div><div class="actions end"><button class="primary" id="closeDamageBtn">ดู HP หลังโดนดาเมจ</button></div></div></div>
+<script src="questions.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
