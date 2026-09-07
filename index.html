@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#F2F5FA">
 <title>Business Survival — Global Shock Challenge</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="phase.css">
 </head>
 <body>
 <div class="app">
@@ -26,13 +27,13 @@
       <span class="eyebrow">⚡ TEAM CHALLENGE</span>
       <h1>BUSINESS<br><span>SURVIVAL</span></h1>
       <h2>โลกโยนปัญหามา ธุรกิจคุณจะรอดไหม?</h2>
-      <p>1 เครื่องต่อ 1 ทีม ตัวแทนทีมเข้าห้องเกม ตั้งชื่อทีม แล้วช่วยกันตัดสินใจให้ธุรกิจรอดจาก Global Shock ทั้ง 20 ด่าน</p>
-      <div class="mini-rules"><span>❤️ เริ่ม 100 HP</span><span>⏱️ 30 วินาที/ข้อ</span><span>💥 ตอบพลาด = เสีย HP</span><span>🔀 ลำดับคำถามสุ่ม</span></div>
+      <p>1 เครื่องต่อ 1 ทีม ตัวแทนทีมเข้าห้องเกม แล้วช่วยกันวิเคราะห์สถานการณ์ก่อนตัดสินใจให้ธุรกิจรอด</p>
+      <div class="mini-rules"><span>❤️ เริ่ม 100 HP</span><span>🗣️ คุยกัน 20 วิ</span><span>⚡ เลือกคำตอบ 10 วิ</span><span>🔀 ลำดับคำถามสุ่ม</span></div>
     </div>
     <div class="join-card card">
       <div class="join-icon">🎮</div>
       <h2>เข้าห้องเกม</h2>
-      <p>ให้ตัวแทนกลุ่มกรอกข้อมูล แล้วส่งเครื่องให้สมาชิกช่วยกันคิด</p>
+      <p>ให้ตัวแทนกลุ่มกรอกข้อมูล แล้ววางเครื่องไว้กลางกลุ่มเพื่อช่วยกันคิด</p>
       <form id="joinForm">
         <label for="teamName">ชื่อทีม</label>
         <input id="teamName" maxlength="28" autocomplete="off" placeholder="เช่น TEAM ROCKET" required>
@@ -59,24 +60,47 @@
     </div>
   </div>
 
-  <div class="question card">
-    <div class="question-head"><span id="roundPill" class="pill">EVENT 01 / 20</span><span id="questionState" class="state-pill">SAFE</span></div>
+  <div class="question card phase-card">
+    <div class="question-head"><span id="roundPill" class="pill">EVENT 01 / 20</span><span id="questionState" class="state-pill discussion">TEAM DISCUSSION</span></div>
 
-    <div class="timer-wrap" aria-label="เวลาคงเหลือ">
-      <div class="timer-meta"><span>⏱️ เวลาคงเหลือ</span><strong><span id="timerText">30</span> วินาที</strong></div>
-      <div class="timer-track"><div id="timerBar" class="timer-bar"></div></div>
-    </div>
+    <section id="briefingPhase" class="game-phase active">
+      <div class="briefing-top">
+        <div><span class="briefing-kicker">📰 ข่าวเช้าวันนี้</span><h2>สถานการณ์ใหม่เข้ามาแล้ว</h2></div>
+        <div class="brief-countdown"><small>เวลาคุยกัน</small><strong><span id="briefTimerText">20</span> วิ</strong></div>
+      </div>
 
-    <div class="event-area"><div id="eventIcon" class="event-icon"></div><div><h2 id="questionTitle"></h2><p id="questionDesc"></p></div></div>
-    <div id="options" class="options"></div>
+      <div class="brief-timer-track"><div id="briefTimerBar" class="brief-timer-bar"></div></div>
 
-    <div id="resultBox" class="result-box" aria-live="polite">
-      <div id="resultIcon" class="result-icon"></div>
-      <div class="result-copy"><span id="resultKicker"></span><h3 id="resultTitle"></h3><p id="resultFeedback"></p></div>
-      <div id="damageBadge" class="damage-badge"></div>
-    </div>
+      <div class="brief-scenario">
+        <div id="briefEventIcon" class="brief-event-icon"></div>
+        <div class="brief-copy"><h3 id="briefQuestionTitle"></h3><p id="briefQuestionDesc"></p></div>
+      </div>
 
-    <div class="controls"><span id="statusNote">คุยกับสมาชิกในทีม แล้วเลือก 1 คำตอบ</span><button class="primary hidden" id="nextBtn" type="button">ข้อต่อไป →</button></div>
+      <div class="discussion-prompt">
+        <div class="discussion-icon">🗣️</div>
+        <div><b>คุยกันก่อน อย่าเพิ่งรีบตอบ</b><span>ปรึกษาสมาชิกในทีมว่า ถ้าเราเป็นเจ้าของกิจการควรทำอย่างไร</span></div>
+      </div>
+      <div class="auto-next-note">ครบ 20 วินาที ระบบจะเปิดตัวเลือกคำตอบอัตโนมัติ</div>
+    </section>
+
+    <section id="answerPhase" class="game-phase">
+      <div class="answer-alert"><span>⚡ DECISION TIME</span><strong>เหลือเวลาเลือกเพียง 10 วินาที!</strong></div>
+      <div class="timer-wrap answer-timer" aria-label="เวลาตอบคำถาม">
+        <div class="timer-meta"><span>⏱️ รีบตัดสินใจ</span><strong><span id="timerText">10</span> วินาที</strong></div>
+        <div class="timer-track"><div id="timerBar" class="timer-bar"></div></div>
+      </div>
+
+      <div class="event-area"><div id="eventIcon" class="event-icon"></div><div><h2 id="questionTitle"></h2><p id="questionDesc"></p></div></div>
+      <div id="options" class="options"></div>
+
+      <div id="resultBox" class="result-box" aria-live="polite">
+        <div id="resultIcon" class="result-icon"></div>
+        <div class="result-copy"><span id="resultKicker"></span><h3 id="resultTitle"></h3><p id="resultFeedback"></p></div>
+        <div id="damageBadge" class="damage-badge"></div>
+      </div>
+
+      <div class="controls"><span id="statusNote">เลือก 1 คำตอบก่อนหมดเวลา</span><button class="primary hidden" id="nextBtn" type="button">ข้อต่อไป →</button></div>
+    </section>
   </div>
 </section>
 
@@ -104,8 +128,10 @@
 <div id="rulesModal" class="modal-wrap">
   <div class="modal card">
     <h2>กติกา BUSINESS SURVIVAL</h2>
-    <p>1 เครื่องต่อ 1 ทีม ช่วยกันตอบ 20 สถานการณ์ แต่ละข้อมีเวลา 30 วินาที และลำดับคำถามของแต่ละทีมจะไม่เหมือนกัน</p>
+    <p>ทุกสถานการณ์มี 2 ช่วง: <b>20 วินาทีสำหรับคุยกัน</b> แล้วระบบจะเปิดตัวเลือกให้ <b>10 วินาทีสำหรับตัดสินใจ</b></p>
     <div class="rules">
+      <div>🗣️ <b>DISCUSS — 20 วินาที</b><span>อ่านสถานการณ์และช่วยกันคิด โดยยังไม่เห็นตัวเลือก</span></div>
+      <div>⚡ <b>DECIDE — 10 วินาที</b><span>ตัวเลือก A / B / C / D จะเปิดขึ้น ต้องตัดสินใจให้ทัน</span></div>
       <div>🟢 <b>NICE MOVE — 0 Damage</b><span>รับมือเหมาะสม ธุรกิจไม่เสีย HP</span></div>
       <div>🟠 <b>OUCH — -10 HP</b><span>พอทำได้ แต่ยังไม่ใช่ทางที่ดีนัก</span></div>
       <div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุด หรือไม่ตอบก่อนหมดเวลา</span></div>
