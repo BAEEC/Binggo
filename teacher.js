@@ -36,21 +36,29 @@ async function openRoom(code){
 function statusLabel(team){
   if(team.status==='bankrupt'||team.hp<=0)return['ล้มละลาย','bankrupt'];
   if(team.status==='survived')return['รอดครบ 20','survived'];
+  if(team.status==='timeup')return['หมดเวลา','playing'];
   return['กำลังเล่น','playing'];
+}
+function rankPriority(team){
+  if(team.status==='survived') return 4;
+  if(team.status==='playing'&&team.hp>0) return 3;
+  if(team.status==='timeup') return 2;
+  return 1;
 }
 
 async function refreshTeams(){
   if(!activeRoom||!window.SyncService)return;
   let teams=[];
   try{teams=await window.SyncService.listTeams(activeRoom);}catch(e){teams=[];}
-  teams.sort((a,b)=>(b.hp-a.hp)||(b.questionIndex-a.questionIndex)||String(a.teamName).localeCompare(String(b.teamName)));
+  teams.sort((a,b)=>(rankPriority(b)-rankPriority(a))||(b.hp-a.hp)||(b.questionIndex-a.questionIndex)||String(a.teamName).localeCompare(String(b.teamName)));
   renderStats(teams); renderTeams(teams);
 }
 
 function renderStats(teams){
   const playing=teams.filter(t=>t.status==='playing'&&t.hp>0).length;
   const survived=teams.filter(t=>t.status==='survived'&&t.hp>0).length;
-  const top=teams.length?Math.max(...teams.map(t=>Number(t.hp)||0)):null;
+  const completed=teams.filter(t=>t.status==='survived');
+  const top=completed.length?Math.max(...completed.map(t=>Number(t.hp)||0)):(teams.length?Math.max(...teams.map(t=>Number(t.hp)||0)):null);
   $('#statTeams').textContent=teams.length;
   $('#statPlaying').textContent=playing;
   $('#statSurvived').textContent=survived;
