@@ -27,8 +27,8 @@
       <span class="eyebrow">⚡ TEAM CHALLENGE</span>
       <h1>BUSINESS<br><span>SURVIVAL</span></h1>
       <h2>โลกโยนปัญหามา ธุรกิจคุณจะรอดไหม?</h2>
-      <p>1 เครื่องต่อ 1 ทีม ตัวแทนทีมเข้าห้องเกม แล้วช่วยกันวิเคราะห์สถานการณ์ก่อนตัดสินใจให้ธุรกิจรอด</p>
-      <div class="mini-rules"><span>❤️ เริ่ม 100 HP</span><span>🗣️ คุยกัน 20 วิ</span><span>⚡ เลือกคำตอบ 10 วิ</span><span>🔀 ลำดับคำถามสุ่ม</span></div>
+      <p>1 เครื่องต่อ 1 ทีม มีเวลาเล่นรวม 20 นาที แต่ละเหตุการณ์คุยกันได้เต็มที่ พอมั่นใจแล้วค่อยกด “พร้อมตัดสินใจ” และเลือกคำตอบภายใน 10 วินาที</p>
+      <div class="mini-rules"><span>❤️ เริ่ม 100 HP</span><span>⏱️ เวลารวม 20 นาที</span><span>🗣️ คุยไม่จำกัดต่อข้อ</span><span>⚡ ตอบ 10 วิ</span><span>🔀 คำถามสุ่ม</span></div>
     </div>
     <div class="join-card card">
       <div class="join-icon">🎮</div>
@@ -39,7 +39,7 @@
         <input id="teamName" maxlength="28" autocomplete="off" placeholder="เช่น TEAM ROCKET" required>
         <label for="roomCode">รหัสห้อง</label>
         <input id="roomCode" maxlength="20" autocomplete="off" placeholder="เช่น MGT13167" required>
-        <button class="primary big" type="submit">⚡ เริ่มเกม</button>
+        <button class="primary big" type="submit">⚡ เริ่มเกม 20 นาที</button>
       </form>
       <button class="link-btn" id="rulesBtn" type="button">ดูกติกาก่อนเล่น</button>
     </div>
@@ -53,6 +53,13 @@
       <h3 id="teamDisplay"></h3>
       <small id="syncBadge" class="sync-badge">● กำลังเชื่อมต่อห้อง</small>
     </div>
+
+    <div id="overallClock" class="overall-clock">
+      <small>⏱️ เวลารวมของทีม</small>
+      <strong id="overallTimerText">20:00</strong>
+      <span id="overallTimerHint">บริหารเวลาให้ผ่านครบ 20 สถานการณ์</span>
+    </div>
+
     <div class="hp-panel">
       <div class="hp-head"><span>❤️ พลังชีวิตของธุรกิจคุณ</span><strong id="hpText">100 HP</strong></div>
       <div class="hpbar large"><div id="hpFill" class="hpfill" style="width:100%"></div></div>
@@ -66,10 +73,8 @@
     <section id="briefingPhase" class="game-phase active">
       <div class="briefing-top">
         <div><span class="briefing-kicker">📰 ข่าวเช้าวันนี้</span><h2>สถานการณ์ใหม่เข้ามาแล้ว</h2></div>
-        <div class="brief-countdown"><small>เวลาคุยกัน</small><strong><span id="briefTimerText">20</span> วิ</strong></div>
+        <div class="discussion-badge"><small>TEAM MODE</small><strong>คุยได้จนมั่นใจ</strong></div>
       </div>
-
-      <div class="brief-timer-track"><div id="briefTimerBar" class="brief-timer-bar"></div></div>
 
       <div class="brief-scenario">
         <div id="briefEventIcon" class="brief-event-icon"></div>
@@ -78,15 +83,19 @@
 
       <div class="discussion-prompt">
         <div class="discussion-icon">🗣️</div>
-        <div><b>คุยกันก่อน อย่าเพิ่งรีบตอบ</b><span>ปรึกษาสมาชิกในทีมว่า ถ้าเราเป็นเจ้าของกิจการควรทำอย่างไร</span></div>
+        <div><b>ช่วยกันคิดก่อน ยังไม่ต้องรีบตอบ</b><span>แลกเหตุผลกันว่า ถ้าเราเป็นเจ้าของกิจการควรรับมืออย่างไร</span></div>
       </div>
-      <div class="auto-next-note">ครบ 20 วินาที ระบบจะเปิดตัวเลือกคำตอบอัตโนมัติ</div>
+
+      <div class="ready-panel">
+        <div><b>มั่นใจแล้วใช่ไหม?</b><span>เมื่อกดแล้ว ตัวเลือกจะเปิด และมีเวลาเพียง 10 วินาที</span></div>
+        <button id="readyDecisionBtn" class="decision-ready-btn" type="button">พร้อมตัดสินใจ ⚡</button>
+      </div>
     </section>
 
     <section id="answerPhase" class="game-phase">
-      <div class="answer-alert"><span>⚡ DECISION TIME</span><strong>เหลือเวลาเลือกเพียง 10 วินาที!</strong></div>
+      <div class="answer-alert"><span>⚡ DECISION TIME</span><strong>เลือกคำตอบภายใน 10 วินาที!</strong></div>
       <div class="timer-wrap answer-timer" aria-label="เวลาตอบคำถาม">
-        <div class="timer-meta"><span>⏱️ รีบตัดสินใจ</span><strong><span id="timerText">10</span> วินาที</strong></div>
+        <div class="timer-meta"><span>⏱️ ตัดสินใจตอนนี้</span><strong><span id="timerText">10</span> วินาที</strong></div>
         <div class="timer-track"><div id="timerBar" class="timer-bar"></div></div>
       </div>
 
@@ -112,7 +121,7 @@
     <p>ทีม <strong id="finishTeam"></strong> · ห้อง <strong id="finishRoom"></strong></p>
     <div class="final-hp"><span>HP ที่เหลือ</span><strong id="finishHp">0</strong></div>
     <div id="finishStatus" class="finish-status"></div>
-    <p class="finish-note">คะแนนถูกบันทึกไว้สำหรับหน้าจอผู้สอนเมื่อระบบห้องออนไลน์เปิดใช้งาน</p>
+    <p id="finishNote" class="finish-note">ผลการแข่งขันถูกบันทึกไว้สำหรับหน้าจอผู้สอน</p>
   </div>
 
   <div class="summary card">
@@ -128,14 +137,16 @@
 <div id="rulesModal" class="modal-wrap">
   <div class="modal card">
     <h2>กติกา BUSINESS SURVIVAL</h2>
-    <p>ทุกสถานการณ์มี 2 ช่วง: <b>20 วินาทีสำหรับคุยกัน</b> แล้วระบบจะเปิดตัวเลือกให้ <b>10 วินาทีสำหรับตัดสินใจ</b></p>
+    <p>ทั้งเกมมีเวลา <b>20 นาที</b> แต่ละเหตุการณ์คุยกันได้ไม่จำกัดเวลา เมื่อทีมมั่นใจค่อยกด <b>พร้อมตัดสินใจ</b> แล้วเลือก A / B / C / D ภายใน 10 วินาที</p>
     <div class="rules">
-      <div>🗣️ <b>DISCUSS — 20 วินาที</b><span>อ่านสถานการณ์และช่วยกันคิด โดยยังไม่เห็นตัวเลือก</span></div>
-      <div>⚡ <b>DECIDE — 10 วินาที</b><span>ตัวเลือก A / B / C / D จะเปิดขึ้น ต้องตัดสินใจให้ทัน</span></div>
+      <div>⏱️ <b>GAME CLOCK — 20 นาที</b><span>เวลารวมเดินต่อเนื่อง ทีมต้องบริหารเวลาเองให้ตอบครบ</span></div>
+      <div>🗣️ <b>DISCUSS — ไม่จำกัดต่อข้อ</b><span>ช่วยกันคิด แลกเหตุผล และเลือกแนวทางก่อนเห็นตัวเลือก</span></div>
+      <div>⚡ <b>DECIDE — 10 วินาที</b><span>เมื่อกดพร้อมตัดสินใจ ตัวเลือกจะเปิดและเริ่มนับถอยหลังทันที</span></div>
       <div>🟢 <b>NICE MOVE — 0 Damage</b><span>รับมือเหมาะสม ธุรกิจไม่เสีย HP</span></div>
       <div>🟠 <b>OUCH — -10 HP</b><span>พอทำได้ แต่ยังไม่ใช่ทางที่ดีนัก</span></div>
-      <div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุด หรือไม่ตอบก่อนหมดเวลา</span></div>
+      <div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุด หรือไม่ตอบภายใน 10 วินาที</span></div>
       <div>☠️ <b>0 HP = ล้มละลาย</b><span>เกมจบทันที ธุรกิจของคุณไปไม่รอด</span></div>
+      <div>🏁 <b>เวลา 20 นาทีหมด</b><span>เกมจบทันที ถ้ายังตอบไม่ครบ จะบันทึกจำนวนข้อที่ผ่านไว้</span></div>
     </div>
     <div class="actions end"><button class="primary" id="closeRulesBtn" type="button">เข้าใจแล้ว</button></div>
   </div>
