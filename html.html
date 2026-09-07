@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Global Shock Bingo — Live Control Room</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg: #0A121A;
+  --bg-grid: #0D1721;
+  --panel: #101B26;
+  --panel-2: #16232F;
+  --panel-3: #1C2B38;
+  --border: #22323F;
+  --border-soft: #1A2732;
+  --text: #E9F0F5;
+  --text-dim: #90A4B4;
+  --text-faint: #5C7183;
+  --amber: #F5A524;
+  --amber-soft: rgba(245,165,36,0.14);
+  --teal: #33D2AA;
+  --teal-soft: rgba(51,210,170,0.14);
+  --red: #EF5A6B;
+  --red-soft: rgba(239,90,107,0.14);
+  --violet: #8C90F5;
+  --violet-soft: rgba(140,144,245,0.14);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --mono: 'Space Grotesk', ui-monospace, 'SF Mono', monospace;
+  --thai: 'Sarabun', 'Noto Sans Thai', 'Leelawadee UI', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 15% -10%, #14202c 0%, transparent 45%),
+    radial-gradient(circle at 100% 0%, #10202a 0%, transparent 40%),
+    repeating-linear-gradient(0deg, var(--bg-grid) 0px, var(--bg-grid) 39px, #0E1A24 40px),
+    repeating-linear-gradient(90deg, var(--bg) 0px, var(--bg) 39px, #0E1A24 40px),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--thai);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--amber-soft);}
+button{font-family:inherit;}
+input{font-family:inherit;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 60px;}
+.wrap.narrow{max-width:520px;padding:0;}
+
+/* ---------- top brand strip ---------- */
+.brandbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--border-soft);
+  background:linear-gradient(180deg, rgba(16,27,38,0.9), rgba(16,27,38,0.4));
+}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;background:var(--amber-soft);
+  border:1px solid rgba(245,165,36,0.35);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;color:var(--amber);font-size:13px;
+}
+.brand-text b{font-family:var(--mono);letter-spacing:0.02em;font-size:15px;font-weight:700;display:block;}
+.brand-text span{font-size:12px;color:var(--text-dim);}
+.sync-pill{
+  font-family:var(--mono);font-size:11px;color:var(--text-faint);
+  display:flex;align-items:center;gap:6px;
+}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);}
+
+/* ---------- buttons ---------- */
+.btn{
+  border:1px solid var(--border);background:var(--panel-2);color:var(--text);
+  padding:11px 18px;border-radius:10px;font-size:14.5px;font-weight:600;
+  cursor:pointer;transition:transform .08s ease, border-color .15s ease, background .15s ease;
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+}
+.btn:hover{border-color:#334656;background:var(--panel-3);}
+.btn:active{transform:scale(0.97);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
+.btn-block{width:100%;}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:#241A05;}
+.btn-amber:hover{background:#ffb43a;border-color:#ffb43a;}
+.btn-teal{background:var(--teal);border-color:var(--teal);color:#04241C;}
+.btn-teal:hover{background:#3fe6bc;}
+.btn-red{background:transparent;border-color:rgba(239,90,107,0.5);color:var(--red);}
+.btn-red:hover{background:var(--red-soft);}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text-dim);}
+.btn-ghost:hover{background:var(--panel-2);color:var(--text);}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:8px;}
+
+/* ---------- role select ---------- */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
+.hero-eyebrow{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:0.08em;margin-bottom:14px;}
+.hero h1{
+  font-family:var(--mono);font-weight:700;font-size:clamp(34px,7vw,58px);
+  line-height:1;margin:0 0 16px;letter-spacing:-0.01em;
+}
+.hero h1 span{color:var(--amber);}
+.hero p{color:var(--text-dim);font-size:16px;max-width:480px;margin:0 auto 40px;line-height:1.6;}
+.role-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:640px;}
+.role-card{
+  width:280px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px 22px;text-align:left;cursor:pointer;transition:border-color .15s, transform .1s;
+}
+.role-card:hover{border-color:var(--amber);transform:translateY(-2px);}
+.role-card .ico{font-size:26px;margin-bottom:12px;}
+.role-card h3{margin:0 0 8px;font-size:18px;}
+.role-card p{margin:0;color:var(--text-dim);font-size:13.5px;line-height:1.55;}
+.hero-foot{margin-top:34px;font-size:12px;color:var(--text-faint);max-width:440px;}
+
+/* ---------- join screens ---------- */
+.join-screen{display:flex;flex-direction:column;align-items:center;padding:60px 20px;min-height:100vh;}
+.join-card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
+.join-card h2{font-size:20px;margin:0 0 6px;}
+.join-card .sub{color:var(--text-dim);font-size:13.5px;margin:0 0 22px;}
+.field label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;font-weight:600;}
+.field input[type=text]{
+  width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  padding:12px 14px;border-radius:9px;font-size:15px;outline:none;
+}
+.field input[type=text]:focus{border-color:var(--amber);}
+.field{margin-bottom:18px;}
+.card-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
+.card-pick button{
+  padding:10px 0;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);
+  color:var(--text-dim);font-family:var(--mono);font-weight:600;cursor:pointer;font-size:13px;
+}
+.card-pick button.sel{border-color:var(--amber);color:var(--amber);background:var(--amber-soft);}
+.hint{font-size:11.5px;color:var(--text-faint);margin:6px 0 20px;line-height:1.5;}
+.back-link{color:var(--text-faint);font-size:13px;cursor:pointer;margin-top:16px;display:inline-block;}
+.back-link:hover{color:var(--text-dim);}
+
+/* ---------- host dashboard ---------- */
+.host-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-top:16px;align-items:start;}
+@media (max-width:900px){.host-grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.panel + .panel{margin-top:16px;}
+.panel-title{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);letter-spacing:0.07em;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;}
+
+.tabbar{display:flex;gap:8px;margin:16px 0 4px;}
+.tab{padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:var(--panel);color:var(--text-dim);font-size:13.5px;font-weight:600;cursor:pointer;}
+.tab.active{background:var(--amber-soft);border-color:rgba(245,165,36,0.4);color:var(--amber);}
+
+.chiprow{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;}
+.chip{
+  flex:0 0 auto;padding:7px 12px;border-radius:20px;border:1px solid var(--border);background:var(--panel-2);
+  color:var(--text-dim);font-size:12.5px;font-family:var(--mono);cursor:pointer;white-space:nowrap;
+}
+.chip.staged{border-color:var(--amber);color:var(--amber);}
+.chip.live{background:var(--teal-soft);border-color:var(--teal);color:var(--teal);}
+
+.shock-card{border:1px solid var(--border-soft);border-radius:var(--radius-sm);background:var(--panel-2);padding:22px;}
+.shock-top{display:flex;align-items:flex-start;gap:14px;}
+.shock-ico{
+  width:52px;height:52px;flex:0 0 52px;border-radius:12px;background:var(--amber-soft);border:1px solid rgba(245,165,36,0.35);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;color:var(--amber);font-size:18px;
+}
+.shock-ico.opp{background:var(--teal-soft);border-color:rgba(51,210,170,0.4);color:var(--teal);}
+.shock-eyebrow{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:0.06em;margin-bottom:3px;}
+.shock-title{font-size:19px;font-weight:700;margin:0 0 6px;}
+.shock-desc{color:var(--text-dim);font-size:14px;line-height:1.6;margin:0;}
+.opp-tag{display:inline-block;margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--teal);background:var(--teal-soft);padding:3px 9px;border-radius:20px;}
+
+.timerwrap{margin-top:18px;}
+.timerrow{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px;}
+.timernum{font-family:var(--mono);font-size:26px;font-weight:700;}
+.timerlabel{font-size:12px;color:var(--text-faint);}
+.timertrack{height:8px;border-radius:6px;background:var(--panel-3);overflow:hidden;}
+.timerfill{height:100%;background:var(--amber);transition:width .3s linear, background .3s;}
+.timerfill.danger{background:var(--red);}
+.timerfill.idle{background:var(--border);}
+
+.ctrlrow{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+
+.answerkey{margin-top:16px;}
+.ak-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media (max-width:640px){.ak-grid{grid-template-columns:1fr;}}
+.ak-col{border-radius:10px;padding:12px 13px;border:1px solid var(--border-soft);}
+.ak-col h4{margin:0 0 8px;font-size:11.5px;font-family:var(--mono);letter-spacing:0.04em;}
+.ak-col ul{margin:0;padding-left:16px;}
+.ak-col li{font-size:12.5px;color:var(--text-dim);margin-bottom:5px;line-height:1.4;}
+.ak-strong{background:rgba(51,210,170,0.06);border-color:rgba(51,210,170,0.3);}
+.ak-strong h4{color:var(--teal);}
+.ak-ok{background:rgba(245,165,36,0.05);border-color:rgba(245,165,36,0.25);}
+.ak-ok h4{color:var(--amber);}
+.ak-weak{background:rgba(239,90,107,0.05);border-color:rgba(239,90,107,0.22);}
+.ak-weak h4{color:var(--red);}
+.ak-core{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--panel-3);font-size:13px;color:var(--text-dim);line-height:1.55;}
+.ak-core b{color:var(--text);}
+.ak-q{margin-top:8px;font-size:12.5px;color:var(--text-faint);font-style:normal;}
+
+/* roster */
+.roster-item{border:1px solid var(--border-soft);border-radius:11px;padding:13px 14px;margin-bottom:10px;background:var(--panel-2);}
+.roster-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;}
+.roster-name{font-weight:700;font-size:14.5px;}
+.roster-meta{font-family:var(--mono);font-size:11px;color:var(--text-faint);margin-top:2px;}
+.roster-badges{display:flex;gap:6px;align-items:center;}
+.badge{font-size:11px;font-family:var(--mono);padding:4px 9px;border-radius:20px;white-space:nowrap;}
+.badge-progress{background:var(--panel-3);color:var(--text-dim);}
+.badge-pending{background:var(--amber-soft);color:var(--amber);}
+.badge-approved{background:var(--teal-soft);color:var(--teal);}
+.badge-rejected{background:var(--red-soft);color:var(--red);}
+.roster-actions{display:flex;gap:8px;margin-top:12px;}
+.roster-empty{color:var(--text-faint);font-size:13.5px;padding:20px 4px;text-align:center;}
+.mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:12px;}
+.mini-cell{
+  aspect-ratio:1;border-radius:5px;background:var(--panel);border:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:center;font-size:7.5px;color:var(--text-faint);
+  text-align:center;line-height:1.15;padding:2px;overflow:hidden;
+}
+.mini-cell.marked{background:var(--amber-soft);border-color:var(--amber);color:var(--amber);font-weight:600;}
+.mini-cell.center{background:var(--teal-soft);border-color:var(--teal);color:var(--teal);font-weight:700;}
+.mini-cell.ask{outline:2px solid var(--violet);outline-offset:-2px;}
+.ask-note{margin-top:10px;font-size:12px;color:var(--violet);background:var(--violet-soft);padding:8px 10px;border-radius:8px;}
+
+/* rules / maap ref */
+.maap-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media (max-width:640px){.maap-legend{grid-template-columns:repeat(2,1fr);}}
+.maap-item{border:1px solid var(--border-soft);border-radius:10px;padding:11px;background:var(--panel-2);}
+.maap-letter{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:15px;}
+.maap-item p{margin:6px 0 0;font-size:12px;color:var(--text-dim);line-height:1.5;}
+.rules-list{list-style:none;margin:0;padding:0;}
+.rules-list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;color:var(--text-dim);}
+.rules-list li:last-child{border-bottom:none;}
+.rules-list b{color:var(--text);font-family:var(--mono);flex:0 0 20px;}
+
+/* debrief */
+.debrief-q{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border-soft);}
+.debrief-q:last-child{border-bottom:none;}
+.debrief-q .n{font-family:var(--mono);color:var(--amber);font-weight:700;flex:0 0 26px;}
+.debrief-q p{margin:0;font-size:15px;line-height:1.6;}
+.takeaway{margin-top:20px;padding:18px;border-radius:12px;background:var(--amber-soft);border:1px solid rgba(245,165,36,0.35);text-align:center;}
+.takeaway b{font-size:16px;}
+.flow{margin-top:12px;text-align:center;font-family:var(--mono);color:var(--text-dim);font-size:14px;}
+
+/* ---------- team view ---------- */
+.team-shell{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+.team-top{
+  position:sticky;top:0;z-index:5;background:rgba(10,18,26,0.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border-soft);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+}
+.team-id b{font-size:15px;display:block;}
+.team-id span{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);}
+.team-shockbar{padding:16px 18px;border-bottom:1px solid var(--border-soft);}
+.waiting-box{
+  text-align:center;padding:34px 20px;color:var(--text-dim);
+}
+.waiting-box .pulse{width:12px;height:12px;border-radius:50%;background:var(--amber);margin:0 auto 14px;animation:pulse 1.6s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,165,36,0.5);}70%{box-shadow:0 0 0 14px rgba(245,165,36,0);}100%{box-shadow:0 0 0 0 rgba(245,165,36,0);}}
+.round-flag{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:0.06em;margin-bottom:6px;}
+.pick-note{margin-top:12px;font-size:12.5px;padding:10px 12px;border-radius:9px;line-height:1.5;}
+.pick-note.ok{background:var(--teal-soft);color:var(--teal);}
+.pick-note.done{background:var(--panel-3);color:var(--text-dim);}
+.pick-note.over{background:var(--red-soft);color:var(--red);}
+
+.grid-wrap{padding:16px 18px;}
+.bingo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.cell{
+  aspect-ratio:1;border-radius:9px;border:1px solid var(--border);background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:11px;line-height:1.2;padding:4px;color:var(--text-dim);cursor:pointer;
+  transition:transform .1s, background .15s, border-color .15s;
+}
+.cell:active{transform:scale(0.95);}
+.cell.center{background:var(--teal-soft);border-color:var(--teal);color:var(--teal);font-weight:700;font-size:12px;}
+.cell.marked{background:var(--amber-soft);border-color:var(--amber);color:var(--amber);font-weight:600;}
+.cell.locked{cursor:not-allowed;opacity:0.55;}
+.cell.inline_win{box-shadow:0 0 0 2px var(--teal) inset;}
+
+.maap-zone{padding:16px 18px 32px;}
+.maap-ready{
+  border:1px solid rgba(51,210,170,0.4);background:var(--teal-soft);border-radius:12px;padding:16px;text-align:center;
+}
+.maap-ready p{margin:0 0 12px;color:var(--teal);font-size:13.5px;}
+.maap-pending-box{border:1px solid rgba(245,165,36,0.4);background:var(--amber-soft);border-radius:12px;padding:16px;text-align:center;color:var(--amber);font-size:13.5px;}
+.maap-approved-box{border:1px solid rgba(51,210,170,0.5);background:var(--teal-soft);border-radius:12px;padding:20px;text-align:center;}
+.maap-approved-box .big{font-size:22px;font-weight:700;color:var(--teal);font-family:var(--mono);margin-bottom:6px;}
+.maap-rejected-box{border:1px solid rgba(239,90,107,0.4);background:var(--red-soft);border-radius:12px;padding:16px;text-align:center;color:var(--red);font-size:13.5px;}
+
+.progress-strip{display:flex;align-items:center;gap:8px;padding:0 18px 12px;font-size:12px;color:var(--text-faint);font-family:var(--mono);}
+.progress-track{flex:1;height:5px;background:var(--panel-3);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--amber);}
+
+.rules-mini{margin:0 18px 24px;padding:14px 16px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);}
+.rules-mini h4{margin:0 0 8px;font-size:11.5px;font-family:var(--mono);color:var(--text-faint);letter-spacing:0.05em;}
+
+.footnote{text-align:center;color:var(--text-faint);font-size:11px;padding:20px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ DATA ============ */
+
+const SHOCKS = [
+  {icon:"%", title:"US Tariff 19%", desc:"สหรัฐฯ เพิ่มภาษีนำเข้าสินค้าจากไทย ทีมของคุณต้องเลือกแนวทางรับมือก่อนคำสั่งซื้อรอบถัดไป", opp:false},
+  {icon:"฿", title:"เงินบาทอ่อนเร็ว 15%", desc:"เงินบาทอ่อนลง 15% ในช่วงสั้น ๆ ส่งผลต่อวัตถุดิบนำเข้า หนี้ต่างประเทศ และรายได้ส่งออก", opp:false},
+  {icon:"🛢", title:"ราคาน้ำมันโลก +30%", desc:"ความขัดแย้งระหว่างประเทศทำให้ต้นทุนพลังงานและค่าขนส่งเพิ่มขึ้น", opp:false},
+  {icon:"🚢", title:"Shipping Disruption", desc:"เส้นทางเดินเรือหลักหยุดชะงัก ระยะเวลาขนส่งเพิ่มจาก 20 วันเป็น 35 วัน", opp:false},
+  {icon:"📱", title:"TikTok Algorithm เปลี่ยน", desc:"Organic Reach ลดลง 50% ยอดขายจาก Live และ Short Video ตกทันที", opp:false},
+  {icon:"¥", title:"สินค้าจีนราคาถูกไหลเข้าไทย", desc:"คู่แข่งต่างชาติขายถูกและส่งฟรีผ่าน Marketplace ลูกค้าเริ่มเปรียบเทียบราคาหนักขึ้น", opp:false},
+  {icon:"AI", title:"AI Price War", desc:"คู่แข่งใช้ AI + Automation ลดต้นทุน แล้วลดราคาสินค้าได้ 20%", opp:false},
+  {icon:"JP", title:"ตลาดญี่ปุ่นต้องการสินค้าไทยเพิ่ม", desc:"กระแสอาหารไทยและสินค้าไทยในญี่ปุ่นเพิ่มขึ้น 20% — นี่คือ Shock ที่เป็นโอกาส", opp:true},
+  {icon:"CO₂", title:"กฎคาร์บอนเข้มขึ้น", desc:"คู่ค้าต่างประเทศเริ่มขอข้อมูลคาร์บอนและ Traceability จาก Supplier ไทย", opp:false},
+  {icon:"!", title:"Trust Crisis", desc:"ข่าวสินค้านำเข้าคุณภาพต่ำแพร่ในโซเชียล ผู้บริโภคเริ่มไม่มั่นใจสินค้าทั้งหมวด", opp:false}
+];
+
+const ANSWERS = [
+ {dense:["ติดตามภาษี","Monitor Order","Cost Simulation","เจรจา Importer/ลูกค้า","กระจายตลาด / สำรวจตลาดใหม่","ตั้ง Trigger Point / ทำ Plan B"],
+  ok:["ปรับราคา","Product Upgrade","ลด SKU กำไรต่ำ","เพิ่มเงินสดสำรอง","เพิ่ม Productivity / ลดต้นทุน"],
+  weak:["Hedge ค่าเงิน","เพิ่ม Inventory","Automation"],
+  core:"ภาษีเปลี่ยนเงื่อนไขการแข่งขันและ Margin ต้องประเมิน Exposure ก่อนปรับราคา ตลาด ต้นทุน หรือแผนสำรอง",
+  q:"Tariff กระทบธุรกิจผ่านช่องทางไหน และ Response นี้ลดผลกระทบตรงจุดไหน?"},
+ {dense:["Monitor ค่าเงิน","Hedge ค่าเงิน","Cost Simulation","ปรับราคา","หา/กระจาย Supplier","Monitor Order"],
+  ok:["เพิ่มเงินสดสำรอง","ชะลอ Investment","ลด SKU กำไรต่ำ","เพิ่ม Productivity","ทำ Plan B"],
+  weak:["ติดตามภาษี","เพิ่ม Inventory (ถ้าไม่อธิบายเรื่องขาดแคลน)","กระจายตลาด (ถ้าไม่เชื่อมกับ FX)"],
+  core:"ต้องรู้ตำแหน่งธุรกิจก่อน เพราะบาทอ่อนไม่ได้เสียหายกับทุกฝ่ายเหมือนกัน",
+  q:"ธุรกิจคุณเป็นผู้นำเข้า ผู้ส่งออก หรือมีหนี้ต่างประเทศ? บาทอ่อนเป็น Threat หรือ Opportunity?"},
+ {dense:["Cost Simulation","ลดต้นทุน","เพิ่ม Productivity","ปรับราคา","ลด SKU กำไรต่ำ","หา/กระจาย Supplier"],
+  ok:["Automation","เพิ่มเงินสดสำรอง","Monitor Order","ทำ Plan B","ชะลอ Investment"],
+  weak:["ติดตามภาษี","Hedge ค่าเงิน (ไม่ใช่ Hedge น้ำมันโดยตรง)","กระจายตลาด"],
+  core:"พลังงานแพงเดินทางผ่านค่าขนส่งและต้นทุนผลิต ต้องรู้ Cost Driver ก่อนเลือกตอบสนอง",
+  q:"ต้นทุนน้ำมันอยู่ตรงไหนใน Cost Structure และ Response นี้ลด Cost หรือรักษา Margin อย่างไร?"},
+ {dense:["เพิ่ม Inventory","กระจาย Supplier","หา Supplier ใหม่","ทำ Plan B","ตั้ง Trigger Point","Monitor Order"],
+  ok:["เพิ่มเงินสดสำรอง","Cost Simulation","ชะลอ Investment","ปรับราคา (ถ้าค่าขนส่งเพิ่ม)","ลด SKU กำไรต่ำ"],
+  weak:["Hedge ค่าเงิน","ติดตามภาษี","Automation (ถ้าไม่อธิบายเรื่อง Visibility)"],
+  core:"Lead Time ยาวขึ้นเพิ่มความเสี่ยง Stockout ต้องเพิ่ม Resilience โดยไม่สร้าง Inventory เกินจำเป็น",
+  q:"ถ้าของมาช้ากว่าเดิม 15 วัน จุดไหนของธุรกิจจะหยุดก่อน และ Response นี้ซื้อเวลาให้ธุรกิจอย่างไร?"},
+ {dense:["เปลี่ยนช่องทางขาย","Monitor Order","ทำ Plan B","ตั้ง Trigger Point","สำรวจตลาดใหม่"],
+  ok:["กระจายตลาด","Product Upgrade","เพิ่ม Productivity","เพิ่มเงินสดสำรอง"],
+  weak:["Hedge ค่าเงิน","ติดตามภาษี","เพิ่ม Inventory","หา Supplier ใหม่"],
+  core:"Shock เกิดที่แพลตฟอร์ม ไม่ใช่ตัวสินค้าโดยตรง เน้นลด Channel Dependence",
+  q:"ปัญหานี้คือ Demand หาย หรือ Channel หาย? ทำไม Response ที่เลือกจึงลดการพึ่งแพลตฟอร์มเดียว?"},
+ {dense:["Product Upgrade","เพิ่ม Productivity","ลดต้นทุน","เปลี่ยนช่องทางขาย","ปรับราคา","ลด SKU กำไรต่ำ"],
+  ok:["สำรวจตลาดใหม่","กระจายตลาด","Automation","Monitor Order","ทำ Plan B"],
+  weak:["เพิ่ม Inventory","Hedge ค่าเงิน","ติดตามภาษี (ถ้าไม่โยงมาตรการการค้า)"],
+  core:"การแข่งขันด้านราคาบังคับให้เลือก Cost Advantage หรือ Differentiation ไม่ใช่ลดราคาตามอย่างเดียว",
+  q:"จะชนราคากับคู่แข่ง หรือหนีการแข่งขันด้วยความแตกต่าง? Response นี้ทำให้ Value Proposition ดีขึ้นอย่างไร?"},
+ {dense:["Automation","เพิ่ม Productivity","Product Upgrade","ลดต้นทุน","ลด SKU กำไรต่ำ","Cost Simulation"],
+  ok:["ปรับราคา","สำรวจตลาดใหม่","เปลี่ยนช่องทางขาย","ทำ Plan B","ชะลอ Investment"],
+  weak:["Hedge ค่าเงิน","ติดตามภาษี","เพิ่ม Inventory"],
+  core:"Shock กระทบโครงสร้างต้นทุนและการแข่งขัน ต้องตอบด้วย Productivity, Automation หรือความแตกต่างของสินค้า",
+  q:"ถ้าแข่งลดราคาอย่างเดียว Margin จะเกิดอะไรขึ้น? Response นี้สร้าง Cost Advantage หรือ Differentiation?"},
+ {dense:["สำรวจตลาดใหม่","กระจายตลาด","Monitor Order","Product Upgrade","เพิ่ม Productivity","เพิ่ม Inventory (เมื่อ Demand ยืนยัน)"],
+  ok:["เจรจา Importer/ลูกค้า","กระจาย Supplier","เพิ่มเงินสดสำรอง","ตั้ง Trigger Point"],
+  weak:["ชะลอ Investment","ลดต้นทุนแบบตัดทันที","เพิ่มตลาดในประเทศ"],
+  core:"Uncontrollable ไม่ได้มีแต่ Threat โอกาสก็ต้อง Monitor และ Assess ก่อนลงทุนขยายกำลังผลิต",
+  q:"ก่อนเพิ่มกำลังผลิต ต้องยืนยันอะไร? Demand นี้เป็นเทรนด์ชั่วคราวหรือโอกาสระยะยาว?"},
+ {dense:["Product Upgrade","Automation (ระบบข้อมูล/Traceability)","หา Supplier ใหม่","กระจาย Supplier","Cost Simulation","ทำ Plan B"],
+  ok:["ตั้ง Trigger Point","Monitor Order","เพิ่มเงินสดสำรอง","ติดตามภาษี (ถ้าโยง Carbon Border Measure ได้)"],
+  weak:["Hedge ค่าเงิน","เพิ่ม Inventory","ปรับราคาโดยไม่แก้ Compliance"],
+  core:"โจทย์หลักคือความสามารถพิสูจน์มาตรฐานและข้อมูลใน Supply Chain ไม่ใช่แค่ราคาขาย",
+  q:"คู่ค้าขอข้อมูลและมาตรฐานอะไรเพิ่ม และ Response นี้ทำให้พิสูจน์ Compliance ได้อย่างไร?"},
+ {dense:["Product Upgrade","Monitor Order","เปลี่ยนช่องทางขาย","เจรจาลูกค้า","ทำ Plan B"],
+  ok:["ลด SKU กำไรต่ำ","ปรับราคา (ถ้าใช้วางตำแหน่งใหม่และมีหลักฐานคุณภาพ)","สำรวจตลาดใหม่","เพิ่มเงินสดสำรอง"],
+  weak:["Hedge ค่าเงิน","เพิ่ม Inventory","ติดตามภาษี"],
+  core:"เมื่อปัญหาเป็นความเชื่อมั่น คำตอบต้องทำให้ลูกค้าเห็นคุณภาพและลดผลกระทบต่อยอดขาย ไม่ใช่เพิ่มสต็อก",
+  q:"ปัญหาหลักคือคุณภาพจริงหรือความเชื่อมั่น? Response นี้ช่วยพิสูจน์คุณภาพหรือสร้าง Trust กลับมาอย่างไร?"}
+];
+
+const CARDS = [
+ ["ชะลอ Investment","ตั้ง Trigger Point","Cost Simulation","ลด SKU กำไรต่ำ","เปลี่ยนช่องทางขาย",
+  "หา Supplier ใหม่","Monitor Order","ลดต้นทุน","กระจาย Supplier","เพิ่ม Inventory",
+  "ทำ Plan B","Automation","FREE","Product Upgrade","Hedge ค่าเงิน",
+  "สำรวจตลาดใหม่","Monitor ค่าเงิน","กระจายตลาด","เพิ่มตลาดในประเทศ","เจรจา Importer",
+  "เพิ่ม Productivity","เพิ่มเงินสดสำรอง","ติดตามภาษี","เจรจาลูกค้า","ปรับราคา"],
+ ["Monitor Order","Product Upgrade","Cost Simulation","กระจายตลาด","ทำ Plan B",
+  "เพิ่มเงินสดสำรอง","เจรจาลูกค้า","เปลี่ยนช่องทางขาย","ลด SKU กำไรต่ำ","Hedge ค่าเงิน",
+  "กระจาย Supplier","Automation","FREE","หา Supplier ใหม่","เจรจา Importer",
+  "ตั้ง Trigger Point","เพิ่ม Inventory","Monitor ค่าเงิน","ติดตามภาษี","สำรวจตลาดใหม่",
+  "เพิ่มตลาดในประเทศ","ปรับราคา","เพิ่ม Productivity","ลดต้นทุน","ชะลอ Investment"],
+ ["เจรจาลูกค้า","กระจายตลาด","Monitor Order","เพิ่มเงินสดสำรอง","ชะลอ Investment",
+  "Automation","Cost Simulation","ลดต้นทุน","ติดตามภาษี","เพิ่ม Productivity",
+  "Product Upgrade","หา Supplier ใหม่","FREE","เพิ่มตลาดในประเทศ","ตั้ง Trigger Point",
+  "กระจาย Supplier","เปลี่ยนช่องทางขาย","Hedge ค่าเงิน","Monitor ค่าเงิน","ลด SKU กำไรต่ำ",
+  "เพิ่ม Inventory","เจรจา Importer","ปรับราคา","สำรวจตลาดใหม่","ทำ Plan B"],
+ ["Product Upgrade","เพิ่มเงินสดสำรอง","ตั้ง Trigger Point","เพิ่ม Productivity","เจรจาลูกค้า",
+  "สำรวจตลาดใหม่","Automation","เพิ่ม Inventory","ติดตามภาษี","กระจายตลาด",
+  "Monitor Order","กระจาย Supplier","FREE","ชะลอ Investment","ลด SKU กำไรต่ำ",
+  "ลดต้นทุน","Monitor ค่าเงิน","หา Supplier ใหม่","เปลี่ยนช่องทางขาย","ปรับราคา",
+  "เจรจา Importer","เพิ่มตลาดในประเทศ","ทำ Plan B","Cost Simulation","Hedge ค่าเงิน"],
+ ["เจรจา Importer","Cost Simulation","ปรับราคา","ทำ Plan B","ตั้ง Trigger Point",
+  "สำรวจตลาดใหม่","Hedge ค่าเงิน","ลดต้นทุน","Monitor Order","ชะลอ Investment",
+  "เจรจาลูกค้า","กระจาย Supplier","FREE","ลด SKU กำไรต่ำ","กระจายตลาด",
+  "Automation","Monitor ค่าเงิน","เปลี่ยนช่องทางขาย","เพิ่ม Productivity","เพิ่มตลาดในประเทศ",
+  "เพิ่ม Inventory","เพิ่มเงินสดสำรอง","ติดตามภาษี","Product Upgrade","หา Supplier ใหม่"],
+ ["ปรับราคา","ทำ Plan B","Automation","สำรวจตลาดใหม่","Cost Simulation",
+  "Product Upgrade","ติดตามภาษี","ตั้ง Trigger Point","เพิ่มเงินสดสำรอง","ลดต้นทุน",
+  "กระจาย Supplier","เจรจา Importer","FREE","หา Supplier ใหม่","เพิ่มตลาดในประเทศ",
+  "ชะลอ Investment","Monitor ค่าเงิน","Hedge ค่าเงิน","กระจายตลาด","เพิ่ม Productivity",
+  "เพิ่ม Inventory","เจรจาลูกค้า","ลด SKU กำไรต่ำ","Monitor Order","เปลี่ยนช่องทางขาย"],
+ ["Monitor Order","Cost Simulation","กระจายตลาด","ปรับราคา","ชะลอ Investment",
+  "เพิ่มเงินสดสำรอง","เพิ่ม Productivity","กระจาย Supplier","สำรวจตลาดใหม่","ลดต้นทุน",
+  "Hedge ค่าเงิน","เจรจา Importer","FREE","เจรจาลูกค้า","ติดตามภาษี",
+  "Product Upgrade","เปลี่ยนช่องทางขาย","ลด SKU กำไรต่ำ","เพิ่มตลาดในประเทศ","ตั้ง Trigger Point",
+  "Monitor ค่าเงิน","Automation","หา Supplier ใหม่","ทำ Plan B","เพิ่ม Inventory"],
+ ["เจรจาลูกค้า","ลด SKU กำไรต่ำ","Cost Simulation","สำรวจตลาดใหม่","เพิ่มตลาดในประเทศ",
+  "ลดต้นทุน","เพิ่มเงินสดสำรอง","กระจาย Supplier","ทำ Plan B","ติดตามภาษี",
+  "Product Upgrade","ตั้ง Trigger Point","FREE","ชะลอ Investment","Hedge ค่าเงิน",
+  "เปลี่ยนช่องทางขาย","Monitor ค่าเงิน","กระจายตลาด","เจรจา Importer","หา Supplier ใหม่",
+  "เพิ่ม Productivity","Monitor Order","ปรับราคา","เพิ่ม Inventory","Automation"]
+];
+
+const RULES = [
+  "หนึ่ง Shock เลือกได้ 1 ช่อง — บังคับให้จัดลำดับความสำคัญ",
+  "ใช้ช่องเดิมซ้ำไม่ได้ — บังคับให้คิดทางเลือกมากกว่าหนึ่งแบบ",
+  "MAAP แล้วต้องอธิบาย — ครูสุ่มถาม 2 ช่อง ถ้าอธิบายไม่ได้ Bingo ถูกยกเลิก"
+];
+
+const MAAP_LEGEND = [
+  {l:"M", t:"Monitor", d:"ติดตามสัญญาณและข้อมูลก่อนตัดสินใจ"},
+  {l:"A", t:"Assess", d:"ประเมินผลกระทบต่อ Revenue, Cost, Supply Chain, Demand"},
+  {l:"A", t:"Adapt", d:"ปรับสิ่งที่องค์กรควบคุมได้จริง"},
+  {l:"P", t:"Prepare", d:"ตั้ง Trigger Point และแผนสำรองล่วงหน้า"}
+];
+
+const DEBRIEF_Q = [
+  "วันนี้ Shock ใดที่ควบคุมไม่ได้ชัดที่สุด?",
+  "ทีมคุณเลือก Response อะไรบ่อยที่สุด? เพราะอะไร?",
+  "เหตุการณ์เดียวกัน ทำไมแต่ละทีมเลือกไม่เหมือนกัน?",
+  "มี Shock ใดเป็นโอกาส ไม่ใช่วิกฤต?",
+  "จากเกมนี้ ผู้บริหารที่ดีควรทำอะไรก่อนเกิดปัญหา?"
+];
+
+const LINES = [
+  [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+  [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+  [0,6,12,18,24],[4,8,12,16,20]
+];
+
+const DEFAULT_ROUND = {shockIndex:-1, roundId:0, timerStart:null, timerDuration:30, active:false, resetEpoch:0};
+
+/* ============ STORAGE LAYER ============ */
+const hasRealStorage = !!(window.storage && typeof window.storage.get === "function");
+const memStore = {};
+async function sGet(key, shared){
+  if(hasRealStorage){
+    try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }
+    catch(e){ return null; }
+  }
+  return Object.prototype.hasOwnProperty.call(memStore, key) ? memStore[key] : null;
+}
+async function sSet(key, value, shared){
+  if(hasRealStorage){
+    try{ await window.storage.set(key, value, shared); return true; }
+    catch(e){ return false; }
+  }
+  memStore[key] = value; return true;
+}
+async function sDelete(key, shared){
+  if(hasRealStorage){ try{ await window.storage.delete(key, shared); }catch(e){} }
+  else{ delete memStore[key]; }
+}
+async function sList(prefix, shared){
+  if(hasRealStorage){
+    try{ const r = await window.storage.list(prefix, shared); return (r && r.keys) ? r.keys : []; }
+    catch(e){ return []; }
+  }
+  return Object.keys(memStore).filter(function(k){ return k.indexOf(prefix)===0; });
+}
+
+/* ============ UTIL ============ */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];
+  });
+}
+function sanitizeName(raw){ return raw.trim().slice(0,40); }
+function teamKeyFor(name){
+  const clean = name.trim().replace(/[\/\\'"]/g,"").replace(/\s+/g,"_").slice(0,120);
+  return "gsb:team:" + clean;
+}
+function randCard(){ return 1 + Math.floor(Math.random()*8); }
+function markedSet(marks){ const s = new Set(marks.map(function(m){return m.cell;})); s.add(12); return s; }
+function completedLines(marks){
+  const s = markedSet(marks);
+  return LINES.filter(function(line){ return line.every(function(i){ return s.has(i); }); });
+}
+function nowSec(){ return Date.now()/1000; }
+function timeLeft(round){
+  if(!round || !round.active || !round.timerStart) return 0;
+  const elapsed = (Date.now() - round.timerStart)/1000;
+  return Math.max(0, round.timerDuration - elapsed);
+}
+function roundIsLive(round){ return !!(round && round.active && timeLeft(round) > 0); }
+
+/* ============ APP STATE ============ */
+let view = "role";      // role | team-join | team-game | host
+let hostTab = "control"; // control | debrief
+let hostStaged = 0;
+let hostTeams = [];
+let hostAskMap = {};    // teamKey -> [cellIdx, cellIdx]
+let currentRound = Object.assign({}, DEFAULT_ROUND);
+
+let teamKey = null;
+let team = null; // {name, cardId, marks:[{cell,round}], maapCalled, maapStatus, resetEpoch, joinedAt}
+let joinCardChoice = null;
+
+let pollTimer = null, tickTimer = null;
+let lastSyncAt = null;
+
+const app = document.getElementById("app");
+
+function clearTimers(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  if(tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+}
+
+/* ============ ROLE SELECT ============ */
+function renderRole(){
+  clearTimers();
+  app.innerHTML =
+  '<div class="hero">'+
+    '<div class="hero-eyebrow">MGT · BUSINESS ENVIRONMENT &amp; MANAGEMENT</div>'+
+    '<h1>GLOBAL SHOCK<br><span>BINGO</span></h1>'+
+    '<p>โลกเปลี่ยน เราควบคุมไม่ได้ทั้งหมด แต่ผู้บริหารเลือกการตอบสนองได้ — เกมบิงโกสดสำหรับเล่นในห้องเรียน ซิงก์ทุกอุปกรณ์แบบเรียลไทม์</p>'+
+    '<div class="role-cards">'+
+      '<div class="role-card" id="pick-host">'+
+        '<div class="ico">🎛️</div><h3>ครูผู้ควบคุมเกม</h3>'+
+        '<p>เปิด Shock ทีละใบ จับเวลา 30 วินาที ดูความคืบหน้าทุกทีม และตรวจสอบ MAAP</p>'+
+      '</div>'+
+      '<div class="role-card" id="pick-team">'+
+        '<div class="ico">🧩</div><h3>ทีมผู้เล่น</h3>'+
+        '<p>รับการ์ด Bingo ของทีม เลือกช่องตอบสนองให้ทันเวลา แล้วตะโกน MAAP เมื่อครบ 5 ช่อง</p>'+
+      '</div>'+
+    '</div>'+
+    '<div class="hero-foot">ทุกอุปกรณ์ที่เปิดลิงก์นี้ (ที่เผยแพร่แล้ว) จะเห็นข้อมูลเกมชุดเดียวกันแบบเรียลไทม์ — ข้อมูลทีมและรอบเกมเป็นข้อมูลที่ผู้เล่นทุกคนมองเห็นร่วมกัน</div>'+
+  '</div>';
+  document.getElementById("pick-host").onclick = function(){ view="host"; hostTab="control"; renderHost(); };
+  document.getElementById("pick-team").onclick = function(){ view="team-join"; renderTeamJoin(); };
+}
+
+/* ============ TEAM JOIN ============ */
+function renderTeamJoin(){
+  clearTimers();
+  app.innerHTML =
+  '<div class="join-screen">'+
+    '<div class="join-card">'+
+      '<h2>เข้าร่วมเป็นทีม</h2>'+
+      '<p class="sub">ตั้งชื่อทีมของคุณ แล้วเลือกหมายเลขการ์ด Bingo (ถ้ามีการ์ดกระดาษแจกอยู่แล้ว ให้เลือกให้ตรงกัน)</p>'+
+      '<div class="field"><label>ชื่อทีม</label><input type="text" id="team-name" placeholder="เช่น ทีมมังกรทอง" maxlength="40"></div>'+
+      '<div class="field"><label>หมายเลขการ์ด (ไม่เลือกก็ได้ ระบบจะสุ่มให้)</label>'+
+        '<div class="card-pick" id="card-pick">'+
+          [1,2,3,4,5,6,7,8].map(function(n){return '<button data-n="'+n+'">'+n+'</button>';}).join("")+
+        '</div>'+
+      '</div>'+
+      '<div class="hint">ตั้งชื่อทีมให้ไม่ซ้ำกับทีมอื่น — ถ้าพิมพ์ชื่อเดิมซ้ำ ระบบจะพาไปที่การ์ดเดิมของทีมนั้น (ใช้กลับเข้าเกมได้ถ้าหลุดออกไป)</div>'+
+      '<button class="btn btn-amber btn-block" id="team-join-btn">เข้าร่วมเกม →</button>'+
+      '<div style="text-align:center"><span class="back-link" id="team-back">← กลับ</span></div>'+
+    '</div>'+
+  '</div>';
+
+  document.getElementById("team-back").onclick = function(){ view="role"; renderRole(); };
+  const pickWrap = document.getElementById("card-pick");
+  pickWrap.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      joinCardChoice = parseInt(b.getAttribute("data-n"),10);
+      pickWrap.querySelectorAll("button").forEach(function(x){x.classList.remove("sel");});
+      b.classList.add("sel");
+    };
+  });
+  const nameInput = document.getElementById("team-name");
+  nameInput.addEventListener("keydown", function(e){ if(e.key==="Enter") doJoin(); });
+  document.getElementById("team-join-btn").onclick = doJoin;
+
+  async function doJoin(){
+    const raw = sanitizeName(nameInput.value||"");
+    if(!raw){ nameInput.focus(); nameInput.style.borderColor="var(--red)"; return; }
+    const key = teamKeyFor(raw);
+    const existingRaw = await sGet(key, true);
+    if(existingRaw){
+      try{ team = JSON.parse(existingRaw); }
+      catch(e){ team = null; }
+    }
+    if(!team){
+      team = {
+        name: raw,
+        cardId: joinCardChoice || randCard(),
+        marks: [],
+        maapCalled: false,
+        maapStatus: null,
+        resetEpoch: currentRound.resetEpoch || 0,
+        joinedAt: Date.now()
+      };
+      await sSet(key, JSON.stringify(team), true);
+    }
+    teamKey = key;
+    view = "team-game";
+    renderTeamGame();
+    startTeamPolling();
+  }
+}
+
+/* ============ TEAM GAME ============ */
+function renderTeamGame(){
+  if(!team) { view="team-join"; renderTeamJoin(); return; }
+  const live = roundIsLive(currentRound);
+  const shock = currentRound.shockIndex>=0 ? SHOCKS[currentRound.shockIndex] : null;
+  const left = timeLeft(currentRound);
+  const pct = currentRound.active ? Math.max(0, Math.min(100, (left/currentRound.timerDuration)*100)) : 0;
+  const card = CARDS[(team.cardId||1)-1];
+  const mset = markedSet(team.marks);
+  const lines = completedLines(team.marks);
+  const alreadyMarkedThisRound = team.marks.some(function(m){ return m.round === currentRound.roundId; });
+  const canPick = live && currentRound.roundId>0 && !alreadyMarkedThisRound;
+
+  let shockHtml;
+  if(!shock){
+    shockHtml =
+      '<div class="waiting-box"><div class="pulse"></div>รอครูเริ่ม Shock แรก…</div>';
+  } else {
+    let noteHtml;
+    if(live && !alreadyMarkedThisRound){
+      noteHtml = '<div class="pick-note ok">แตะ 1 ช่องที่คุณคิดว่าเหมาะที่สุด แล้วเตรียมเหตุผลสั้น ๆ ไว้อธิบาย</div>';
+    } else if(live && alreadyMarkedThisRound){
+      noteHtml = '<div class="pick-note done">เลือกช่องของ Shock นี้แล้ว — รอ Shock ถัดไป</div>';
+    } else if(currentRound.roundId>0 && !currentRound.active){
+      noteHtml = '<div class="pick-note over">หมดเวลาของ Shock นี้แล้ว รอครูเปิดใบถัดไป</div>';
+    } else {
+      noteHtml = "";
+    }
+    shockHtml =
+      '<div class="round-flag">SHOCK '+String(currentRound.shockIndex+1).padStart(2,"0")+' / 10'+(shock.opp?' · โอกาส':'')+'</div>'+
+      '<div class="shock-top">'+
+        '<div class="shock-ico'+(shock.opp?' opp':'')+'">'+esc(shock.icon)+'</div>'+
+        '<div><div class="shock-title">'+esc(shock.title)+'</div><p class="shock-desc">'+esc(shock.desc)+'</p></div>'+
+      '</div>'+
+      '<div class="timerwrap">'+
+        '<div class="timerrow"><span class="timernum">'+Math.ceil(left)+'s</span><span class="timerlabel">'+(live?'กำลังตัดสินใจ':'ปิดรอบแล้ว')+'</span></div>'+
+        '<div class="timertrack"><div class="timerfill'+(left<=10&&live?' danger':(live?'':' idle'))+'" style="width:'+pct+'%"></div></div>'+
+      '</div>'+
+      noteHtml;
+  }
+
+  let gridCells = "";
+  for(let i=0;i<25;i++){
+    const isCenter = i===12;
+    const isMarked = mset.has(i);
+    const locked = !isCenter && (!canPick && !isMarked);
+    const cls = ["cell"];
+    if(isCenter) cls.push("center");
+    else if(isMarked) cls.push("marked");
+    if(locked) cls.push("locked");
+    gridCells += '<div class="'+cls.join(" ")+'" data-i="'+i+'">'+esc(card[i])+'</div>';
+  }
+
+  let maapHtml = "";
+  if(team.maapStatus === "approved"){
+    maapHtml = '<div class="maap-approved-box"><div class="big">🎉 MAAP ผ่าน!</div>ทีม '+esc(team.name)+' บิงโกสำเร็จ — เหตุผลเชื่อมโยงชัดเจน</div>';
+  } else if(team.maapStatus === "pending"){
+    maapHtml = '<div class="maap-pending-box">📣 ตะโกน MAAP แล้ว — รอครูสุ่มถาม 2 ช่องเพื่อตรวจเหตุผล</div>';
+  } else if(team.maapStatus === "rejected"){
+    maapHtml = '<div class="maap-rejected-box">Bingo นี้ยังไม่ผ่าน — อธิบายเหตุผลไม่เชื่อมกับ Shock พอ ลองหาแนวทแยง/แถวอื่นต่อได้</div>'+
+      (lines.length>0 ? '<button class="btn btn-amber btn-block" id="maap-btn" style="margin-top:10px">📣 ตะโกน MAAP! อีกครั้ง</button>' : "");
+  } else if(lines.length>0){
+    maapHtml = '<div class="maap-ready"><p>ครบ '+lines.length+' แนวแล้ว! พร้อมอธิบายเหตุผลหรือยัง?</p><button class="btn btn-teal btn-block" id="maap-btn">📣 ตะโกน MAAP!</button></div>';
+  }
+
+  const progressCount = team.marks.length;
+
+  app.innerHTML =
+  '<div class="team-shell">'+
+    '<div class="team-top">'+
+      '<div class="team-id"><b>'+esc(team.name)+'</b><span>การ์ด #'+(team.cardId||1)+'</span></div>'+
+      '<button class="btn btn-ghost btn-sm" id="leave-btn">ออก</button>'+
+    '</div>'+
+    '<div class="team-shockbar">'+shockHtml+'</div>'+
+    '<div class="progress-strip"><span>'+progressCount+'/24</span><div class="progress-track"><div class="progress-fill" style="width:'+((progressCount/24)*100)+'%"></div></div><span>'+lines.length+' แนวครบ</span></div>'+
+    '<div class="grid-wrap"><div class="bingo-grid" id="bingo-grid">'+gridCells+'</div></div>'+
+    '<div class="maap-zone">'+maapHtml+'</div>'+
+    '<div class="rules-mini"><h4>กติกา</h4><ul class="rules-list">'+
+      RULES.map(function(r,i){return '<li><b>0'+(i+1)+'</b>'+esc(r)+'</li>';}).join("")+
+    '</ul></div>'+
+    '<div class="footnote">ซิงก์ล่าสุด '+(lastSyncAt||"—")+(hasRealStorage?"":" · โหมดทดสอบในเครื่อง (ไม่ซิงก์ข้ามอุปกรณ์)")+'</div>'+
+  '</div>';
+
+  document.getElementById("leave-btn").onclick = function(){
+    clearTimers(); team=null; teamKey=null; view="role"; renderRole();
+  };
+  document.getElementById("bingo-grid").querySelectorAll(".cell").forEach(function(c){
+    c.addEventListener("click", function(){
+      const i = parseInt(c.getAttribute("data-i"),10);
+      onCellClick(i);
+    });
+  });
+  const maapBtn = document.getElementById("maap-btn");
+  if(maapBtn) maapBtn.onclick = onMaapCall;
+}
+
+async function onCellClick(i){
+  if(i===12) return;
+  const live = roundIsLive(currentRound);
+  const already = markedSet(team.marks).has(i);
+  const alreadyThisRound = team.marks.some(function(m){ return m.round === currentRound.roundId; });
+  if(already || !live || currentRound.roundId<=0 || alreadyThisRound) return;
+  team.marks.push({cell:i, round:currentRound.roundId});
+  await sSet(teamKey, JSON.stringify(team), true);
+  renderTeamGame();
+}
+
+async function onMaapCall(){
+  team.maapCalled = true;
+  team.maapStatus = "pending";
+  await sSet(teamKey, JSON.stringify(team), true);
+  renderTeamGame();
+}
+
+function startTeamPolling(){
+  clearTimers();
+  teamPollOnce();
+  pollTimer = setInterval(teamPollOnce, 3000);
+  tickTimer = setInterval(function(){ if(view==="team-game") renderTeamGame(); }, 1000);
+}
+
+async function teamPollOnce(){
+  const roundRaw = await sGet("gsb:round", true);
+  if(roundRaw){ try{ currentRound = JSON.parse(roundRaw); }catch(e){} }
+  else { currentRound = Object.assign({}, DEFAULT_ROUND); }
+
+  if(teamKey){
+    const teamRaw = await sGet(teamKey, true);
+    if(teamRaw){
+      try{ team = JSON.parse(teamRaw); }catch(e){}
+    }
+    if(team.resetEpoch !== (currentRound.resetEpoch||0)){
+      team.marks = []; team.maapCalled=false; team.maapStatus=null; team.resetEpoch = currentRound.resetEpoch||0;
+      await sSet(teamKey, JSON.stringify(team), true);
+    }
+  }
+  lastSyncAt = new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  if(view==="team-game") renderTeamGame();
+}
+
+/* ============ HOST DASHBOARD ============ */
+function renderHost(){
+  clearTimers();
+  hostPollOnce();
+  pollTimer = setInterval(hostPollOnce, 4000);
+  tickTimer = setInterval(function(){ if(view==="host") paintHost(); }, 1000);
+  paintHost();
+}
+
+async function hostPollOnce(){
+  const roundRaw = await sGet("gsb:round", true);
+  if(roundRaw){ try{ currentRound = JSON.parse(roundRaw); if(currentRound.active) hostStaged = currentRound.shockIndex; }catch(e){} }
+  const keys = await sList("gsb:team:", true);
+  const list = [];
+  for(const k of keys){
+    const raw = await sGet(k, true);
+    if(!raw) continue;
+    try{
+      const t = JSON.parse(raw);
+      list.push(Object.assign({key:k}, t));
+    }catch(e){}
+  }
+  list.sort(function(a,b){ return (a.joinedAt||0)-(b.joinedAt||0); });
+  hostTeams = list;
+  lastSyncAt = new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  if(view==="host") paintHost();
+}
+
+async function hostOpenRound(){
+  currentRound = {
+    shockIndex: hostStaged,
+    roundId: (currentRound.roundId||0)+1,
+    timerStart: Date.now(),
+    timerDuration: 30,
+    active: true,
+    resetEpoch: currentRound.resetEpoch||0
+  };
+  await sSet("gsb:round", JSON.stringify(currentRound), true);
+  paintHost();
+}
+async function hostStopRound(){
+  currentRound = Object.assign({}, currentRound, {active:false});
+  await sSet("gsb:round", JSON.stringify(currentRound), true);
+  paintHost();
+}
+async function hostResetGame(){
+  if(!confirm("รีเซ็ตเกม? ข้อมูลทุกทีมและรอบปัจจุบันจะถูกล้างทั้งหมด")) return;
+  const keys = await sList("gsb:team:", true);
+  for(const k of keys){ await sDelete(k, true); }
+  currentRound = Object.assign({}, DEFAULT_ROUND, {resetEpoch: Date.now()});
+  await sSet("gsb:round", JSON.stringify(currentRound), true);
+  hostStaged = 0; hostTeams = [];
+  paintHost();
+}
+async function hostValidate(teamObj, status){
+  const raw = await sGet(teamObj.key, true);
+  let t = teamObj;
+  if(raw){ try{ t = JSON.parse(raw); }catch(e){} }
+  t.maapStatus = status;
+  await sSet(teamObj.key, JSON.stringify(t), true);
+  hostPollOnce();
+}
+
+function askTwoCells(teamObj){
+  const lines = completedLines(teamObj.marks||[]);
+  if(lines.length===0) return [];
+  const line = lines[0].filter(function(i){return i!==12;});
+  const shuffled = line.slice().sort(function(){return Math.random()-0.5;});
+  return shuffled.slice(0,2);
+}
+
+function paintHost(){
+  const live = roundIsLive(currentRound);
+  const left = timeLeft(currentRound);
+  const pct = currentRound.active ? Math.max(0, Math.min(100,(left/currentRound.timerDuration)*100)) : 0;
+  const staged = SHOCKS[hostStaged];
+  const ak = ANSWERS[hostStaged];
+
+  const chips = SHOCKS.map(function(s,i){
+    let cls = "chip";
+    if(currentRound.active && currentRound.shockIndex===i) cls += " live";
+    else if(hostStaged===i) cls += " staged";
+    return '<div class="'+cls+'" data-i="'+i+'">'+(i+1)+'. '+esc(s.title.length>16? s.title.slice(0,16)+"…": s.title)+'</div>';
+  }).join("");
+
+  const controlHtml =
+    '<div class="panel">'+
+      '<div class="panel-title">SHOCK CARD<span>'+(hostStaged+1)+' / 10</span></div>'+
+      '<div class="chiprow" id="chiprow">'+chips+'</div>'+
+      '<div class="shock-card">'+
+        '<div class="shock-top">'+
+          '<div class="shock-ico'+(staged.opp?' opp':'')+'">'+esc(staged.icon)+'</div>'+
+          '<div><div class="shock-eyebrow">SHOCK '+String(hostStaged+1).padStart(2,"0")+(staged.opp?' · โอกาส':'')+'</div><div class="shock-title">'+esc(staged.title)+'</div><p class="shock-desc">'+esc(staged.desc)+'</p></div>'+
+        '</div>'+
+        '<div class="timerwrap">'+
+          '<div class="timerrow"><span class="timernum">'+Math.ceil(currentRound.active?left:currentRound.timerDuration)+'s</span><span class="timerlabel">'+
+            (currentRound.active && currentRound.shockIndex===hostStaged ? (live?'กำลังนับถอยหลัง':'หมดเวลาแล้ว') : 'ยังไม่เริ่มจับเวลา')+'</span></div>'+
+          '<div class="timertrack"><div class="timerfill'+(currentRound.active && currentRound.shockIndex===hostStaged ? (left<=10?' danger':'') : ' idle')+'" style="width:'+(currentRound.active && currentRound.shockIndex===hostStaged?pct:0)+'%"></div></div>'+
+        '</div>'+
+        '<div class="ctrlrow">'+
+          '<button class="btn btn-ghost" id="prev-shock" '+(hostStaged<=0?'disabled':'')+'>◀ ก่อนหน้า</button>'+
+          '<button class="btn btn-amber" id="open-round">🚨 เปิด Shock นี้ + จับเวลา 30 วิ</button>'+
+          '<button class="btn btn-ghost" id="next-shock" '+(hostStaged>=9?'disabled':'')+'>ถัดไป ▶</button>'+
+          (currentRound.active && currentRound.shockIndex===hostStaged ? '<button class="btn btn-red" id="stop-round">⏹ ปิดรอบตอนนี้</button>' : "")+
+        '</div>'+
+      '</div>'+
+      '<div class="answerkey">'+
+        '<div class="panel-title" style="margin-top:18px">ANSWER KEY สำหรับใบนี้</div>'+
+        '<div class="ak-grid">'+
+          '<div class="ak-col ak-strong"><h4>คำตอบเด่น</h4><ul>'+ak.dense.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>'+
+          '<div class="ak-col ak-ok"><h4>ยอมรับได้ถ้าอธิบายดี</h4><ul>'+ak.ok.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>'+
+          '<div class="ak-col ak-weak"><h4>อ่อน / ไม่ตรง</h4><ul>'+ak.weak.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>'+
+        '</div>'+
+        '<div class="ak-core"><b>เหตุผลแกนกลาง:</b> '+esc(ak.core)+'<div class="ak-q">คำถามตรวจเหตุผล: '+esc(ak.q)+'</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="panel">'+
+      '<div class="panel-title">กติกา 3 ข้อ</div>'+
+      '<ul class="rules-list">'+RULES.map(function(r,i){return '<li><b>0'+(i+1)+'</b>'+esc(r)+'</li>';}).join("")+'</ul>'+
+    '</div>'+
+    '<div class="panel">'+
+      '<div class="panel-title">MAAP Framework</div>'+
+      '<div class="maap-legend">'+MAAP_LEGEND.map(function(m){return '<div class="maap-item"><div class="maap-letter">'+m.l+'</div><div style="font-size:12.5px;font-weight:600;margin-top:2px">'+m.t+'</div><p>'+esc(m.d)+'</p></div>';}).join("")+'</div>'+
+    '</div>';
+
+  const rosterItems = hostTeams.length===0
+    ? '<div class="roster-empty">ยังไม่มีทีมเข้าร่วม — ให้นักเรียนเปิดลิงก์นี้แล้วเลือก “ทีมผู้เล่น”</div>'
+    : hostTeams.map(function(t){
+        const lines = completedLines(t.marks||[]);
+        let badge = '<span class="badge badge-progress">'+ (t.marks?t.marks.length:0) +'/24</span>';
+        if(t.maapStatus==="pending") badge += '<span class="badge badge-pending">MAAP รอตรวจ</span>';
+        else if(t.maapStatus==="approved") badge += '<span class="badge badge-approved">ผ่านแล้ว</span>';
+        else if(t.maapStatus==="rejected") badge += '<span class="badge badge-rejected">ไม่ผ่าน</span>';
+        else if(lines.length>0) badge += '<span class="badge badge-pending">พร้อม MAAP</span>';
+
+        const askCells = hostAskMap[t.key] || [];
+        const card = CARDS[(t.cardId||1)-1];
+        const mset = markedSet(t.marks||[]);
+        let miniGrid = "";
+        for(let i=0;i<25;i++){
+          const cls=["mini-cell"];
+          if(i===12) cls.push("center");
+          else if(mset.has(i)) cls.push("marked");
+          if(askCells.indexOf(i)>=0) cls.push("ask");
+          miniGrid += '<div class="'+cls.join(" ")+'">'+esc(card[i])+'</div>';
+        }
+        let actions = "";
+        if(t.maapStatus==="pending"){
+          actions =
+            '<div class="roster-actions">'+
+              '<button class="btn btn-sm btn-ghost" data-ask="'+t.key+'">🎲 สุ่มถาม 2 ช่อง</button>'+
+              '<button class="btn btn-sm btn-teal" data-approve="'+t.key+'">ผ่าน ✓</button>'+
+              '<button class="btn btn-sm btn-red" data-reject="'+t.key+'">ไม่ผ่าน ✕</button>'+
+            '</div>'+
+            (askCells.length>0 ? '<div class="ask-note">ถามช่องที่ไฮไลต์ไว้: “Shock นี้ทำให้เลือกช่องนี้เพราะอะไร? ช่วยลดความเสี่ยงหรือคว้าโอกาสตรงไหน?”</div>' : "");
+        }
+        return '<div class="roster-item">'+
+          '<div class="roster-head" data-toggle="'+t.key+'">'+
+            '<div><div class="roster-name">'+esc(t.name)+'</div><div class="roster-meta">การ์ด #'+(t.cardId||1)+' · '+lines.length+' แนวครบ</div></div>'+
+            '<div class="roster-badges">'+badge+'</div>'+
+          '</div>'+
+          '<div class="roster-body" id="body-'+cssEsc(t.key)+'" style="display:none">'+
+            '<div class="mini-grid">'+miniGrid+'</div>'+
+            actions+
+          '</div>'+
+        '</div>';
+      }).join("");
+
+  const rosterHtml =
+    '<div class="panel">'+
+      '<div class="panel-title">ทีมที่เข้าร่วม<span>'+hostTeams.length+' ทีม</span></div>'+
+      rosterItems+
+    '</div>';
+
+  const debriefHtml =
+    '<div class="panel">'+
+      '<div class="panel-title">DEBRIEF · สรุปหลังเกม</div>'+
+      DEBRIEF_Q.map(function(q,i){return '<div class="debrief-q"><span class="n">0'+(i+1)+'</span><p>'+esc(q)+'</p></div>';}).join("")+
+      '<div class="takeaway"><b>Uncontrollable ≠ Unmanageable</b></div>'+
+      '<div class="flow">Monitor → Assess → Adapt → Prepare</div>'+
+    '</div>';
+
+  app.innerHTML =
+    '<div class="brandbar">'+
+      '<div class="brand"><div class="brand-mark">GSB</div><div class="brand-text"><b>GLOBAL SHOCK BINGO</b><span>ห้องควบคุมของครู</span></div></div>'+
+      '<div style="display:flex;align-items:center;gap:14px">'+
+        '<div class="sync-pill"><span class="sync-dot"></span>ซิงก์ล่าสุด '+(lastSyncAt||"—")+(hasRealStorage?"":" · โหมดทดสอบในเครื่อง")+'</div>'+
+        '<button class="btn btn-sm btn-red" id="reset-game">รีเซ็ตเกม</button>'+
+        '<button class="btn btn-sm btn-ghost" id="host-exit">ออก</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="wrap">'+
+      '<div class="tabbar">'+
+        '<div class="tab '+(hostTab==="control"?"active":"")+'" id="tab-control">ควบคุมเกม</div>'+
+        '<div class="tab '+(hostTab==="debrief"?"active":"")+'" id="tab-debrief">Debrief ท้ายเกม</div>'+
+      '</div>'+
+      '<div class="host-grid">'+
+        '<div>'+(hostTab==="control"?controlHtml:debriefHtml)+'</div>'+
+        '<div>'+rosterHtml+'</div>'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById("reset-game").onclick = hostResetGame;
+  document.getElementById("host-exit").onclick = function(){ clearTimers(); view="role"; renderRole(); };
+  document.getElementById("tab-control").onclick = function(){ hostTab="control"; paintHost(); };
+  document.getElementById("tab-debrief").onclick = function(){ hostTab="debrief"; paintHost(); };
+
+  if(hostTab==="control"){
+    document.getElementById("chiprow").querySelectorAll(".chip").forEach(function(c){
+      c.onclick = function(){ hostStaged = parseInt(c.getAttribute("data-i"),10); paintHost(); };
+    });
+    const prevBtn = document.getElementById("prev-shock");
+    const nextBtn = document.getElementById("next-shock");
+    if(prevBtn) prevBtn.onclick = function(){ if(hostStaged>0){hostStaged--; paintHost();} };
+    if(nextBtn) nextBtn.onclick = function(){ if(hostStaged<9){hostStaged++; paintHost();} };
+    document.getElementById("open-round").onclick = hostOpenRound;
+    const stopBtn = document.getElementById("stop-round");
+    if(stopBtn) stopBtn.onclick = hostStopRound;
+  }
+
+  app.querySelectorAll("[data-toggle]").forEach(function(h){
+    h.onclick = function(){
+      const key = h.getAttribute("data-toggle");
+      const body = document.getElementById("body-"+cssEsc(key));
+      if(body) body.style.display = body.style.display==="none" ? "block" : "none";
+    };
+  });
+  app.querySelectorAll("[data-ask]").forEach(function(b){
+    b.onclick = function(){
+      const key = b.getAttribute("data-ask");
+      const t = hostTeams.find(function(x){return x.key===key;});
+      if(t) hostAskMap[key] = askTwoCells(t);
+      paintHost();
+    };
+  });
+  app.querySelectorAll("[data-approve]").forEach(function(b){
+    b.onclick = function(){
+      const key = b.getAttribute("data-approve");
+      const t = hostTeams.find(function(x){return x.key===key;});
+      if(t) hostValidate(t, "approved");
+    };
+  });
+  app.querySelectorAll("[data-reject]").forEach(function(b){
+    b.onclick = function(){
+      const key = b.getAttribute("data-reject");
+      const t = hostTeams.find(function(x){return x.key===key;});
+      if(t) hostValidate(t, "rejected");
+    };
+  });
+}
+
+function cssEsc(s){ return s.replace(/[^a-zA-Z0-9_-]/g, function(c){ return "_"+c.charCodeAt(0)+"_"; }); }
+
+/* ============ BOOT ============ */
+renderRole();
+
+})();
+</script>
+</body>
+</html>
