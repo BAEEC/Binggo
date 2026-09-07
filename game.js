@@ -7,11 +7,14 @@ let roomCode = '';
 let sessionId = '';
 let hp = 100;
 let qIndex = 0;
-let timerId = null;
+let decisionTimerId = null;
 let tickTimerId = null;
-let timeLeft = 20;
+let overallTimerId = null;
+let decisionTimeLeft = 10;
+let overallSeconds = 20 * 60;
 let answered = false;
 let finished = false;
+let gameCompletePending = false;
 let history = [];
 let gameQuestions = [];
 let soundEnabled = true;
@@ -48,18 +51,22 @@ const Sound = {
   good(){ [523,659,784].forEach((f,i)=>this.tone(f,.13,'sine',.04,i*.08)); },
   mid(){ this.tone(440,.12,'triangle',.035); this.tone(330,.18,'triangle',.035,.10); },
   bad(){ this.tone(190,.16,'sawtooth',.035); this.tone(125,.28,'sawtooth',.04,.11); },
-  tick(intensity=0, kind='answer'){
-    const base = kind==='briefing' ? 390 : 650;
-    const freq = base + Math.round(intensity * (kind==='briefing' ? 220 : 560));
-    const volume = (kind==='briefing' ? .012 : .02) + intensity * .014;
+  tick(intensity=0){
+    const freq = 650 + Math.round(intensity * 560);
+    const volume = .02 + intensity * .014;
     const duration = intensity>.7 ? .035 : .05;
     this.tone(freq,duration,'square',volume);
-    if(kind==='answer' && intensity>.62) this.tone(freq+120,.03,'square',Math.max(.014,volume-.007),.065);
+    if(intensity>.62) this.tone(freq+120,.03,'square',Math.max(.014,volume-.007),.065);
   },
   transition(){
     this.tone(520,.08,'triangle',.03);
     this.tone(720,.08,'triangle',.035,.09);
     this.tone(940,.11,'triangle',.04,.18);
+  },
+  timeup(){
+    this.tone(330,.15,'triangle',.04);
+    this.tone(260,.18,'triangle',.04,.12);
+    this.tone(180,.32,'sawtooth',.035,.26);
   },
   win(){ [523,659,784,1046].forEach((f,i)=>this.tone(f,.18,'sine',.045,i*.10)); },
   bankrupt(){ [220,175,130,95].forEach((f,i)=>this.tone(f,.22,'sawtooth',.04,i*.12)); }
@@ -90,8 +97,9 @@ async function saveSnapshot(status='playing'){
     sessionId, roomCode, teamName, hp, status,
     questionIndex: history.length,
     totalQuestions: gameQuestions.length,
-    completed: status==='survived' || status==='bankrupt',
-    history
+    completed: status==='survived' || status==='bankrupt' || status==='timeup',
+    history,
+    secondsRemaining: overallSeconds
   };
   try{ await window.SyncService.saveTeam(payload); updateSyncBadge(); }catch(e){ updateSyncBadge(true); }
 }
@@ -110,24 +118,31 @@ function joinGame(e){
   const name=$('#teamName').value.trim();
   const code=cleanCode($('#roomCode').value);
   if(!name || !code) return;
+
   Sound.init(); Sound.tap();
   teamName=name; roomCode=code; sessionId=makeSessionId();
-  hp=100; qIndex=0; history=[]; answered=false; finished=false;
+  hp=100; qIndex=0; history=[]; answered=false; finished=false; gameCompletePending=false;
+  overallSeconds=20*60;
   gameQuestions=shuffle(SOURCE_QUESTIONS.map((q,i)=>({...q,sourceIndex:i}))).slice(0,Math.min(20,SOURCE_QUESTIONS.length));
+
   $('#teamDisplay').textContent=teamName;
   $('#roomDisplay').textContent=roomCode;
   $('#teacherResultLink').href=`teacher.html?room=${encodeURIComponent(roomCode)}`;
   updateSyncBadge();
+  updateOverallClock();
+
   show('game');
   saveSnapshot('playing');
+  startOverallTimer();
   renderQuestion();
 }
 
 function renderQuestion(){
-  clearTimer();
+  clearDecisionTimer();
   answered=false;
   phase='briefing';
   const q=gameQuestions[qIndex];
+
   $('#roundPill').textContent=`EVENT ${String(qIndex+1).padStart(2,'0')} / ${gameQuestions.length}`;
   $('#questionState').textContent='TEAM DISCUSSION';
   $('#questionState').className='state-pill discussion';
@@ -144,7 +159,8 @@ function renderQuestion(){
   $('#nextBtn').textContent=qIndex===gameQuestions.length-1?'ดูผลสรุป →':'ข้อต่อไป →';
   $('#statusNote').textContent='เลือก 1 คำตอบก่อนหมดเวลา';
 
-  const box=$('#options'); box.innerHTML='';
+  const box=$('#options');
+  box.innerHTML='';
   ['A','B','C','D'].forEach((letter,i)=>{
     const b=document.createElement('button');
     b.type='button';
@@ -157,33 +173,15 @@ function renderQuestion(){
   $('#briefingPhase').classList.add('active');
   $('#answerPhase').classList.remove('active','answer-phase-flash');
   updateHp();
-  startBriefingTimer();
-}
-
-function startBriefingTimer(){
-  clearTimer();
-  phase='briefing';
-  timeLeft=20;
-  $('#briefTimerText').textContent='20';
-  $('#briefTimerBar').style.width='100%';
-  $('#briefTimerBar').className='brief-timer-bar';
-  scheduleTick();
-  timerId=setInterval(()=>{
-    timeLeft--;
-    $('#briefTimerText').textContent=String(timeLeft);
-    $('#briefTimerBar').style.width=`${Math.max(0,(timeLeft/20)*100)}%`;
-    if(timeLeft<=5) $('#briefTimerBar').className='brief-timer-bar danger';
-    else if(timeLeft<=10) $('#briefTimerBar').className='brief-timer-bar warning';
-    if(timeLeft<=0) startAnswerPhase();
-  },1000);
+  saveSnapshot('playing');
 }
 
 function startAnswerPhase(){
-  if(finished || answered) return;
-  clearTimer();
+  if(finished || answered || phase!=='briefing') return;
   phase='answer';
-  timeLeft=10;
+  decisionTimeLeft=10;
   Sound.transition();
+
   $('#briefingPhase').classList.remove('active');
   $('#answerPhase').classList.add('active','answer-phase-flash');
   $('#questionState').textContent='DECISION TIME';
@@ -192,53 +190,57 @@ function startAnswerPhase(){
   $('#timerBar').style.width='100%';
   $('#timerBar').className='timer-bar';
   $('#statusNote').textContent='10 วินาที! เลือกคำตอบของทีมตอนนี้';
+
+  startDecisionTimer();
+}
+
+function startDecisionTimer(){
+  clearDecisionTimer();
   scheduleTick();
-  timerId=setInterval(()=>{
-    timeLeft--;
-    $('#timerText').textContent=String(timeLeft);
-    $('#timerBar').style.width=`${Math.max(0,(timeLeft/10)*100)}%`;
-    if(timeLeft<=3) $('#timerBar').className='timer-bar danger';
-    else if(timeLeft<=6) $('#timerBar').className='timer-bar warning';
-    if(timeLeft<=0) timeoutAnswer();
+  decisionTimerId=setInterval(()=>{
+    decisionTimeLeft--;
+    $('#timerText').textContent=String(decisionTimeLeft);
+    $('#timerBar').style.width=`${Math.max(0,(decisionTimeLeft/10)*100)}%`;
+    if(decisionTimeLeft<=3) $('#timerBar').className='timer-bar danger';
+    else if(decisionTimeLeft<=6) $('#timerBar').className='timer-bar warning';
+    if(decisionTimeLeft<=0) timeoutAnswer();
   },1000);
 }
 
 function scheduleTick(){
   if(tickTimerId){ clearTimeout(tickTimerId); tickTimerId=null; }
-  if(!soundEnabled || answered || finished || timeLeft<=0 || !screens.game.classList.contains('active')) return;
+  if(!soundEnabled || answered || finished || phase!=='answer' || decisionTimeLeft<=0 || !screens.game.classList.contains('active')) return;
 
-  let interval=1200, intensity=.05;
-  if(phase==='briefing'){
-    if(timeLeft<=10){interval=850;intensity=.22;}
-    if(timeLeft<=5){interval=580;intensity=.42;}
-    Sound.tick(intensity,'briefing');
-  }else{
-    interval=720; intensity=.35;
-    if(timeLeft<=7){interval=560;intensity=.48;}
-    if(timeLeft<=5){interval=390;intensity=.68;}
-    if(timeLeft<=3){interval=245;intensity=.86;}
-    if(timeLeft<=1){interval=155;intensity=1;}
-    Sound.tick(intensity,'answer');
-  }
+  let interval=720, intensity=.35;
+  if(decisionTimeLeft<=7){interval=560;intensity=.48;}
+  if(decisionTimeLeft<=5){interval=390;intensity=.68;}
+  if(decisionTimeLeft<=3){interval=245;intensity=.86;}
+  if(decisionTimeLeft<=1){interval=155;intensity=1;}
+  Sound.tick(intensity);
   tickTimerId=setTimeout(scheduleTick,interval);
 }
 
 function choose(index, btn){
   if(answered || finished || phase!=='answer') return;
   answered=true;
-  clearTimer();
+  clearDecisionTimer();
   Sound.tap();
+
   const q=gameQuestions[qIndex];
   const opt=q.options[index];
-  $$('.option').forEach((el,i)=>{ el.disabled=true; if(i===index) el.classList.add('selected'); else el.classList.add('dimmed'); });
+  $$('.option').forEach((el,i)=>{
+    el.disabled=true;
+    if(i===index) el.classList.add('selected');
+    else el.classList.add('dimmed');
+  });
   applyResult(opt,false,index);
 }
 
 function timeoutAnswer(){
   if(answered || finished) return;
   answered=true;
-  clearTimer();
-  $$('.option').forEach(el=>{el.disabled=true;el.classList.add('dimmed')});
+  clearDecisionTimer();
+  $$('.option').forEach(el=>{el.disabled=true;el.classList.add('dimmed');});
   applyResult({damage:20,feedback:'หมดเวลา! ทีมยังไม่ได้เลือกคำตอบภายใน 10 วินาที'},true,-1);
 }
 
@@ -277,12 +279,21 @@ function applyResult(opt,timedOut,selectedIndex){
 
   if(hp<=0){
     finished=true;
-    clearTimer();
+    stopOverallTimer();
     $('#nextBtn').classList.add('hidden');
     $('#hpStatus').textContent='BUSINESS FAILED ☠️';
     $('#hpStatus').className='failed-text';
     saveSnapshot('bankrupt');
     setTimeout(()=>{ Sound.bankrupt(); $('#bankruptModal').classList.add('open'); },650);
+    return;
+  }
+
+  if(qIndex===gameQuestions.length-1){
+    gameCompletePending=true;
+    stopOverallTimer();
+    $('#statusNote').textContent='🏁 ผ่านครบ 20 สถานการณ์แล้ว!';
+    $('#nextBtn').classList.remove('hidden');
+    saveSnapshot('survived');
     return;
   }
 
@@ -300,9 +311,52 @@ function updateHp(){
   }
 }
 
+function formatTime(total){
+  const sec=Math.max(0,Math.floor(total));
+  const m=Math.floor(sec/60);
+  const s=sec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function updateOverallClock(){
+  $('#overallTimerText').textContent=formatTime(overallSeconds);
+  const clock=$('#overallClock');
+  clock.className='overall-clock';
+  if(overallSeconds<=60) clock.classList.add('danger');
+  else if(overallSeconds<=5*60) clock.classList.add('warning');
+
+  const hint=$('#overallTimerHint');
+  if(overallSeconds<=60) hint.textContent='เหลือน้อยกว่า 1 นาที!';
+  else if(overallSeconds<=5*60) hint.textContent='เหลือน้อยกว่า 5 นาที จัดลำดับให้ดี';
+  else hint.textContent='บริหารเวลาให้ผ่านครบ 20 สถานการณ์';
+}
+
+function startOverallTimer(){
+  stopOverallTimer();
+  updateOverallClock();
+  overallTimerId=setInterval(()=>{
+    if(finished || gameCompletePending){ stopOverallTimer(); return; }
+    overallSeconds=Math.max(0,overallSeconds-1);
+    updateOverallClock();
+    if(overallSeconds%15===0) saveSnapshot('playing');
+    if(overallSeconds<=0){
+      stopOverallTimer();
+      Sound.timeup();
+      finishGame('timeup');
+    }
+  },1000);
+}
+
+function stopOverallTimer(){
+  if(overallTimerId){ clearInterval(overallTimerId); overallTimerId=null; }
+}
+
 function nextQuestion(){
   if(finished) return;
-  if(qIndex>=gameQuestions.length-1){ finishGame('survived'); return; }
+  if(gameCompletePending || qIndex>=gameQuestions.length-1){
+    finishGame('survived');
+    return;
+  }
   qIndex++;
   renderQuestion();
 }
@@ -323,19 +377,31 @@ function renderHistory(){
 }
 
 function finishGame(reason='survived'){
+  if(finished && reason!=='bankrupt') return;
   finished=true;
-  clearTimer();
+  clearDecisionTimer();
+  stopOverallTimer();
   $('#bankruptModal').classList.remove('open');
+
   $('#finishTeam').textContent=teamName;
   $('#finishRoom').textContent=roomCode;
   $('#finishHp').textContent=hp;
+
   const bankrupt=reason==='bankrupt' || hp<=0;
+  const timeup=reason==='timeup';
 
   if(bankrupt){
     $('#finishIcon').textContent='☠️';
     $('#finishKicker').textContent='BUSINESS FAILED';
     $('#finishTitle').textContent='ล้มละลาย — ธุรกิจของคุณไปไม่รอด';
     $('#finishStatus').textContent=`จบที่สถานการณ์ ${history.length} / ${gameQuestions.length}`;
+    $('#finishNote').textContent='ธุรกิจ HP หมดก่อนผ่านครบ 20 สถานการณ์';
+  }else if(timeup){
+    $('#finishIcon').textContent='⏰';
+    $('#finishKicker').textContent='TIME IS UP';
+    $('#finishTitle').textContent='หมดเวลา 20 นาที';
+    $('#finishStatus').textContent=`ตอบได้ ${history.length} / ${gameQuestions.length} สถานการณ์ · เหลือ ${hp} HP`;
+    $('#finishNote').textContent='ทีมที่ผ่านครบ 20 สถานการณ์จะมีอันดับเหนือทีมที่ยังตอบไม่ครบ แม้ HP จะเหลือมากกว่า';
   }else{
     $('#finishIcon').textContent='🏆';
     $('#finishKicker').textContent='GAME COMPLETE';
@@ -344,24 +410,30 @@ function finishGame(reason='survived'){
     if(hp>80) status='สุดยอดผู้บริหาร 🔥';
     else if(hp>60) status='บริหารได้ดี 👍';
     else if(hp>30) status='ยังอยู่ แต่เจ็บหนัก 😮‍💨';
-    $('#finishStatus').textContent=status;
+    $('#finishStatus').textContent=`${status} · เหลือเวลา ${formatTime(overallSeconds)}`;
+    $('#finishNote').textContent='ภารกิจสำเร็จ: ผ่านครบ 20 สถานการณ์ภายในเวลาที่กำหนด';
     Sound.win();
   }
 
   renderHistory();
   show('result');
-  saveSnapshot(bankrupt?'bankrupt':'survived');
+  saveSnapshot(bankrupt?'bankrupt':timeup?'timeup':'survived');
 }
 
-function clearTimer(){
-  if(timerId){ clearInterval(timerId); timerId=null; }
+function clearDecisionTimer(){
+  if(decisionTimerId){ clearInterval(decisionTimerId); decisionTimerId=null; }
   if(tickTimerId){ clearTimeout(tickTimerId); tickTimerId=null; }
+}
+
+function clearAllTimers(){
+  clearDecisionTimer();
+  stopOverallTimer();
 }
 
 function resetGame(){
   if(screens.join.classList.contains('active')) return;
   if(confirm('ออกจากเกมและกลับหน้าเข้าห้อง?')){
-    clearTimer();
+    clearAllTimers();
     finished=true;
     show('join');
   }
@@ -377,14 +449,20 @@ function toggleSound(){
   soundEnabled=!soundEnabled;
   $('#soundBtn').textContent=soundEnabled?'🔊 เสียง: เปิด':'🔇 เสียง: ปิด';
   $('#soundBtn').setAttribute('aria-pressed',String(soundEnabled));
-  if(soundEnabled){ Sound.init(); Sound.tap(); if(screens.game.classList.contains('active') && !answered && !finished) scheduleTick(); }
-  else if(tickTimerId){ clearTimeout(tickTimerId); tickTimerId=null; }
+  if(soundEnabled){
+    Sound.init(); Sound.tap();
+    if(screens.game.classList.contains('active') && !answered && !finished && phase==='answer') scheduleTick();
+  }else if(tickTimerId){
+    clearTimeout(tickTimerId);
+    tickTimerId=null;
+  }
 }
 
 $('#joinForm').addEventListener('submit',joinGame);
+$('#readyDecisionBtn').addEventListener('click',startAnswerPhase);
 $('#nextBtn').addEventListener('click',nextQuestion);
 $('#bankruptSummaryBtn').addEventListener('click',()=>finishGame('bankrupt'));
-$('#playAgainBtn').addEventListener('click',()=>{ clearTimer(); finished=true; $('#bankruptModal').classList.remove('open'); show('join'); });
+$('#playAgainBtn').addEventListener('click',()=>{ clearAllTimers(); finished=true; gameCompletePending=false; $('#bankruptModal').classList.remove('open'); show('join'); });
 $('#resetBtn').addEventListener('click',resetGame);
 $('#fullscreenBtn').addEventListener('click',fullscreen);
 $('#soundBtn').addEventListener('click',toggleSound);
