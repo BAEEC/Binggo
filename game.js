@@ -1,1 +1,199 @@
-const qs=window.GAME_QUESTIONS||[];const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];let teams=[],qIndex=0,selections={},timerId=null,timeLeft=30,revealed=false;const screens={home:$('#homeScreen'),setup:$('#setupScreen'),game:$('#gameScreen'),result:$('#resultScreen')};function show(name){Object.values(screens).forEach(x=>x.classList.remove('active'));screens[name].classList.add('active')}function makeTeamCount(){const s=$('#teamCount');for(let i=2;i<=8;i++){const o=document.createElement('option');o.value=i;o.textContent=`${i} ทีม`;if(i===4)o.selected=true;s.appendChild(o)}renderTeamEditor()}function renderTeamEditor(){const n=+$('#teamCount').value||4;const box=$('#teamEditor');box.innerHTML='';for(let i=0;i<n;i++){const row=document.createElement('div');row.className='team-row';row.innerHTML=`<div class="team-badge">${i+1}</div><input maxlength="24" value="TEAM ${i+1}" aria-label="ชื่อทีม ${i+1}">`;box.appendChild(row)}}function startGame(){teams=$$('#teamEditor input').map((i,idx)=>({name:i.value.trim()||`TEAM ${idx+1}`,hp:100,failed:false}));qIndex=0;selections={};revealed=false;show('game');renderQuestion()}function renderQuestion(){clearTimer();timeLeft=30;$('#timerText').textContent='30';$('#roundPill').textContent=`EVENT ${String(qIndex+1).padStart(2,'0')} / ${qs.length}`;const q=qs[qIndex];$('#eventIcon').textContent=q.icon;$('#questionTitle').textContent=q.title;$('#questionDesc').textContent=q.desc;const box=$('#options');box.innerHTML='';['A','B','C','D'].forEach((letter,i)=>{const b=document.createElement('button');b.type='button';b.className='option';b.dataset.index=i;b.innerHTML=`<span class="letter">${letter}</span><span>${q.options[i].text}</span>`;b.addEventListener('click',()=>assignChoice(i));box.appendChild(b)});selections={};revealed=false;$('#revealBanner').classList.remove('show');$('#nextBtn').classList.add('hidden');$('#revealBtn').classList.remove('hidden');$('#statusNote').textContent='ให้แต่ละทีมเลือกคำตอบ';renderScores()}function assignChoice(choice){if(revealed)return;const available=teams.map((t,i)=>({t,i})).filter(x=>selections[x.i]===undefined);if(!available.length){$('#statusNote').textContent='ครบทุกทีมแล้ว กด REVEAL DAMAGE';return}let promptText='เลือกทีมที่จะตอบข้อนี้:\n'+available.map((x,n)=>`${n+1}. ${x.t.name}`).join('\n');let ans=prompt(promptText);let pick=parseInt(ans,10)-1;if(Number.isNaN(pick)||!available[pick])return;selections[available[pick].i]=choice;renderScores();$('#statusNote').textContent=Object.keys(selections).length===teams.length?'ครบทุกทีมแล้ว กด REVEAL DAMAGE':`ตอบแล้ว ${Object.keys(selections).length}/${teams.length} ทีม`}function renderScores(){const box=$('#teamScores');box.innerHTML='';teams.forEach((t,i)=>{const div=document.createElement('div');div.className='team-score'+(t.failed?' failed':'');const choice=selections[i];const ch=choice===undefined?'—':['A','B','C','D'][choice];div.innerHTML=`<div class="row"><span>${t.failed?'☠️ ':''}${t.name}</span><span>${t.hp} HP · ${ch}</span></div><div class="hpbar"><div class="hpfill" style="width:${Math.max(0,t.hp)}%"></div></div>`;box.appendChild(div)})}function reveal(){if(revealed)return;if(Object.keys(selections).length<teams.length){if(!confirm('ยังมีทีมที่ไม่ได้เลือกคำตอบ ต้องการ Reveal เลยไหม?'))return}revealed=true;clearTimer();const q=qs[qIndex];let rows='';teams.forEach((t,i)=>{const c=selections[i];if(c===undefined){rows+=`<div class="team-result"><span>${t.name} — ไม่ได้ตอบ</span><b class="dmg20">-20 HP</b></div>`;t.hp=Math.max(0,t.hp-20)}else{const opt=q.options[c];t.hp=Math.max(0,t.hp-opt.damage);rows+=`<div class="team-result"><span>${t.name} — ${['A','B','C','D'][c]} ${opt.damage===0?'NICE MOVE':opt.damage===10?'OUCH':'CRITICAL HIT'}</span><b class="dmg${opt.damage}">${opt.damage===0?'0':`-${opt.damage}`} HP</b></div>`}if(t.hp<=0)t.failed=true});$('#teamResults').innerHTML=rows;const grades=q.options.map(o=>o.damage);$$('.option').forEach((el,i)=>el.classList.add(grades[i]===0?'answer-good':grades[i]===10?'answer-mid':'answer-bad'));const best=q.options.filter(o=>o.damage===0);$('#damageModalTitle').textContent=qIndex===qs.length-1?'FINAL BOSS RESULT':'ผลการตัดสินใจ';$('#damageModalExplain').textContent='คำตอบที่ดีที่สุด: '+best.map((o,i)=>o.text).join(' / ');$('#damageModal').classList.add('open');$('#revealTitle').textContent='เฉลยเปิดแล้ว';$('#revealText').textContent=best[0].feedback;$('#revealBanner').classList.add('show');$('#revealBtn').classList.add('hidden');$('#nextBtn').classList.remove('hidden');renderScores()}function next(){if(qIndex>=qs.length-1){finish()}else{qIndex++;renderQuestion()}}function finish(){clearTimer();const ranked=[...teams].sort((a,b)=>b.hp-a.hp);$('#rankList').innerHTML=ranked.map((t,i)=>`<div class="rank"><strong>${['🥇','🥈','🥉'][i]||i+1}</strong><div><b>${t.name}</b><br><small>${t.hp>0?'BUSINESS SURVIVED':'BUSINESS FAILED'}</small></div><strong>${t.hp} HP</strong></div>`).join('');$('#winnerName').textContent=ranked[0].name;$('#winnerHp').textContent=`เหลือ ${ranked[0].hp} HP`;show('result')}function startTimer(){if(timerId)return;timerId=setInterval(()=>{timeLeft--;$('#timerText').textContent=timeLeft;if(timeLeft<=0){clearTimer();$('#statusNote').textContent='หมดเวลา! เลือกคำตอบแล้ว Reveal ได้เลย'}},1000)}function clearTimer(){if(timerId){clearInterval(timerId);timerId=null}}function resetGame(){if(confirm('เริ่มเกมใหม่ทั้งหมด?')){clearTimer();show('home')}}function fullscreen(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen();else if(document.exitFullscreen)document.exitFullscreen()}$('#goSetupBtn').addEventListener('click',()=>show('setup'));$('#backHomeBtn').addEventListener('click',()=>show('home'));$('#teamCount').addEventListener('change',renderTeamEditor);$('#startGameBtn').addEventListener('click',startGame);$('#timerBtn').addEventListener('click',startTimer);$('#revealBtn').addEventListener('click',reveal);$('#nextBtn').addEventListener('click',next);$('#closeDamageBtn').addEventListener('click',()=>$('#damageModal').classList.remove('open'));$('#playAgainBtn').addEventListener('click',()=>show('setup'));$('#resetBtn').addEventListener('click',resetGame);$('#fullscreenBtn').addEventListener('click',fullscreen);$('#rulesBtn').addEventListener('click',()=>$('#rulesModal').classList.add('open'));$('#closeRulesBtn').addEventListener('click',()=>$('#rulesModal').classList.remove('open'));makeTeamCount();
+const qs = window.GAME_QUESTIONS || [];
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+let teamName = '';
+let roomCode = '';
+let hp = 100;
+let qIndex = 0;
+let timerId = null;
+let timeLeft = 30;
+let answered = false;
+let finished = false;
+
+const screens = {
+  join: $('#joinScreen'),
+  game: $('#gameScreen'),
+  result: $('#resultScreen')
+};
+
+function show(name){
+  Object.values(screens).forEach(x => x.classList.remove('active'));
+  screens[name].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function cleanCode(v){
+  return v.trim().toUpperCase().replace(/\s+/g,'');
+}
+
+function joinGame(e){
+  e.preventDefault();
+  const name = $('#teamName').value.trim();
+  const code = cleanCode($('#roomCode').value);
+  if(!name || !code) return;
+  teamName = name;
+  roomCode = code;
+  hp = 100;
+  qIndex = 0;
+  finished = false;
+  $('#teamDisplay').textContent = teamName;
+  $('#roomDisplay').textContent = roomCode;
+  show('game');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  clearTimer();
+  answered = false;
+  timeLeft = 30;
+  const q = qs[qIndex];
+  $('#roundPill').textContent = `EVENT ${String(qIndex+1).padStart(2,'0')} / ${qs.length}`;
+  $('#questionState').textContent = 'เลือกคำตอบก่อนหมดเวลา';
+  $('#questionState').className = 'state-pill';
+  $('#eventIcon').textContent = q.icon;
+  $('#questionTitle').textContent = q.title;
+  $('#questionDesc').textContent = q.desc;
+  $('#timerText').textContent = '30';
+  $('#timerBar').style.width = '100%';
+  $('#timerBar').className = 'timer-bar';
+  $('#resultBox').className = 'result-box';
+  $('#nextBtn').classList.add('hidden');
+  $('#statusNote').textContent = 'คุยกับสมาชิกในทีม แล้วเลือก 1 คำตอบ';
+
+  const box = $('#options');
+  box.innerHTML = '';
+  ['A','B','C','D'].forEach((letter,i)=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className='option';
+    b.innerHTML = `<span class="letter">${letter}</span><span>${q.options[i].text}</span>`;
+    b.addEventListener('click',()=>choose(i,b));
+    box.appendChild(b);
+  });
+
+  updateHp();
+  startTimer();
+}
+
+function choose(index, btn){
+  if(answered || finished) return;
+  answered = true;
+  clearTimer();
+  const q = qs[qIndex];
+  const opt = q.options[index];
+  $$('.option').forEach((el,i)=>{
+    el.disabled = true;
+    if(i===index) el.classList.add('selected');
+  });
+  applyResult(opt, false);
+}
+
+function timeoutAnswer(){
+  if(answered || finished) return;
+  answered = true;
+  clearTimer();
+  $$('.option').forEach(el=>el.disabled=true);
+  applyResult({damage:20,feedback:'หมดเวลา! ทีมไม่ได้เลือกคำตอบภายใน 30 วินาที'}, true);
+}
+
+function applyResult(opt, timedOut){
+  const damage = opt.damage || 0;
+  hp = Math.max(0, hp - damage);
+  updateHp();
+
+  let cls='good', icon='🟢', kicker='NICE MOVE!', title='รอดตัวไป', dmg='0 DAMAGE';
+  if(damage===10){ cls='mid'; icon='🟠'; kicker='OUCH!'; title='พลาดนิดหน่อย'; dmg='-10 HP'; }
+  if(damage>=20){ cls='bad'; icon=timedOut?'⏰':'🔴'; kicker=timedOut?'TIME OUT!':'CRITICAL HIT!'; title=timedOut?'หมดเวลา':'ธุรกิจเจ็บหนัก'; dmg='-20 HP'; }
+
+  $('#resultIcon').textContent = icon;
+  $('#resultKicker').textContent = kicker;
+  $('#resultTitle').textContent = title;
+  $('#resultFeedback').textContent = opt.feedback;
+  $('#damageBadge').textContent = dmg;
+  $('#resultBox').className = `result-box show ${cls}`;
+  $('#questionState').textContent = damage===0?'SAFE':damage===10?'HIT -10':'HIT -20';
+  $('#questionState').className = `state-pill ${cls}`;
+  $('#statusNote').textContent = hp<=0 ? '☠️ BUSINESS FAILED — ยังเล่นต่อได้เพื่อให้ครบ 20 ข้อ' : `เหลือ ${hp} HP`;
+  $('#nextBtn').classList.remove('hidden');
+
+  if(hp<=0){
+    $('#hpStatus').textContent='BUSINESS FAILED ☠️';
+    $('#hpStatus').className='failed-text';
+  }
+}
+
+function updateHp(){
+  $('#hpText').textContent = `${hp} HP`;
+  $('#hpFill').style.width = `${hp}%`;
+  $('#hpFill').className = 'hpfill' + (hp<=30?' danger':hp<=60?' warning':'');
+  if(hp>0){
+    $('#hpStatus').textContent = hp<=30?'DANGER ZONE':hp<=60?'BUSINESS AT RISK':'BUSINESS ACTIVE';
+    $('#hpStatus').className = '';
+  }
+}
+
+function nextQuestion(){
+  if(qIndex >= qs.length-1){
+    finishGame();
+    return;
+  }
+  qIndex++;
+  renderQuestion();
+}
+
+function finishGame(){
+  finished = true;
+  clearTimer();
+  $('#finishTeam').textContent = teamName;
+  $('#finishRoom').textContent = roomCode;
+  $('#finishHp').textContent = hp;
+  let status='ธุรกิจรอด! 🎉';
+  if(hp===0) status='BUSINESS FAILED ☠️';
+  else if(hp<=30) status='รอดแบบเฉียดฉิว 😵';
+  else if(hp<=60) status='ยังอยู่ แต่เจ็บหนัก 😮‍💨';
+  else if(hp<=80) status='บริหารได้ดี 👍';
+  else status='สุดยอดผู้บริหาร 🔥';
+  $('#finishStatus').textContent=status;
+  $('#finishTitle').textContent = hp>0?'จบครบ 20 ด่าน!':'ภารกิจจบแล้ว';
+  show('result');
+}
+
+function startTimer(){
+  clearTimer();
+  timerId = setInterval(()=>{
+    timeLeft--;
+    $('#timerText').textContent = String(timeLeft);
+    const pct = Math.max(0,(timeLeft/30)*100);
+    $('#timerBar').style.width = `${pct}%`;
+    if(timeLeft<=10) $('#timerBar').className='timer-bar danger';
+    else if(timeLeft<=20) $('#timerBar').className='timer-bar warning';
+    if(timeLeft<=0) timeoutAnswer();
+  },1000);
+}
+
+function clearTimer(){
+  if(timerId){ clearInterval(timerId); timerId=null; }
+}
+
+function resetGame(){
+  if(screens.join.classList.contains('active')) return;
+  if(confirm('ออกจากเกมและกลับหน้าเข้าห้อง?')){
+    clearTimer();
+    show('join');
+  }
+}
+
+function fullscreen(){
+  const el=document.documentElement;
+  if(!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen();
+  else if(document.exitFullscreen) document.exitFullscreen();
+}
+
+$('#joinForm').addEventListener('submit',joinGame);
+$('#nextBtn').addEventListener('click',nextQuestion);
+$('#playAgainBtn').addEventListener('click',()=>{ clearTimer(); show('join'); });
+$('#resetBtn').addEventListener('click',resetGame);
+$('#fullscreenBtn').addEventListener('click',fullscreen);
+$('#rulesBtn').addEventListener('click',()=>$('#rulesModal').classList.add('open'));
+$('#closeRulesBtn').addEventListener('click',()=>$('#rulesModal').classList.remove('open'));
