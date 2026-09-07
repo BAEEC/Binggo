@@ -6,6 +6,11 @@
 <meta name="theme-color" content="#F2F5FA">
 <title>Teacher Monitor — Business Survival</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.timer-control{margin:18px 0;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border:1px solid #dce4df;border-radius:18px;background:linear-gradient(135deg,#f8fbf9,#eef7f0)}
+.timer-control-copy small{display:block;color:#68736c;font-weight:700}.timer-control-copy strong{font-size:20px}.timer-control-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.timer-control-actions button{min-width:48px;height:44px;border-radius:12px}.timer-value{min-width:104px;text-align:center;padding:8px 12px;background:#fff;border:1px solid #d7e1da;border-radius:12px}.timer-value strong{font-size:22px}.timer-save{background:#43AB47!important;color:white!important;border-color:#43AB47!important;font-weight:900}.timer-status{font-size:12px;font-weight:800;color:#27832b;min-width:100%;text-align:right}
+@media(max-width:700px){.timer-control{align-items:flex-start;flex-direction:column}.timer-control-actions{width:100%;justify-content:flex-start}.timer-save{flex:1}.timer-status{text-align:left}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -34,6 +39,17 @@
   <div class="teacher-head">
     <div><span class="eyebrow">LIVE CLASSROOM</span><h1>ROOM <span id="teacherRoomDisplay"></span></h1><p>อัปเดตคะแนนอัตโนมัติทุก 2 วินาที</p></div>
     <div><span id="liveBadge" class="live-badge">● LIVE</span></div>
+  </div>
+
+  <div class="timer-control card">
+    <div class="timer-control-copy"><small>⏱️ ACTIVITY TIME</small><strong>เวลารวมของกิจกรรม</strong><small>ปรับได้ตลอดเวลา · ทีมที่กำลังเล่นจะได้รับ/ถูกหักเวลาตามส่วนต่างทันที</small></div>
+    <div class="timer-control-actions">
+      <button id="timerMinus5" type="button">−5</button><button id="timerMinus1" type="button">−1</button>
+      <div class="timer-value"><strong id="teacherDuration">20</strong> นาที</div>
+      <button id="timerPlus1" type="button">+1</button><button id="timerPlus5" type="button">+5</button>
+      <button id="timerSave" class="timer-save" type="button">ใช้เวลานี้</button>
+      <span id="timerStatus" class="timer-status">พร้อมปรับเวลา</span>
+    </div>
   </div>
 
   <div class="teacher-stats">
