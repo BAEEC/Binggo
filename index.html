@@ -11,51 +11,96 @@
 <div class="app">
 <header class="topbar">
   <div class="brand"><div class="brandmark">MGT</div><div><b>BUSINESS SURVIVAL</b><small>Global Shock Challenge</small></div></div>
-  <div class="top-actions"><button id="fullscreenBtn">⛶ เต็มจอ</button><button id="resetBtn">↻ เริ่มใหม่</button></div>
+  <div class="top-actions"><button id="fullscreenBtn" type="button">⛶ เต็มจอ</button><button id="resetBtn" type="button">↻ ออกจากเกม</button></div>
 </header>
+
 <main class="main">
-<section id="homeScreen" class="screen active">
-  <div class="hero card">
-    <div class="hero-copy">
-      <span class="eyebrow">⚡ CLASSROOM GAME</span>
+<section id="joinScreen" class="screen active">
+  <div class="join-layout">
+    <div class="join-copy">
+      <span class="eyebrow">⚡ TEAM CHALLENGE</span>
       <h1>BUSINESS<br><span>SURVIVAL</span></h1>
       <h2>โลกโยนปัญหามา ธุรกิจคุณจะรอดไหม?</h2>
-      <p>ทุกทีมเริ่มด้วยพลังธุรกิจ 100 HP เจอเหตุการณ์ระดับโลก 20 ด่าน เลือกทางรับมือ แล้วรับผลจากการตัดสินใจ ทีมที่เหลือ HP สูงสุดคือผู้ชนะ</p>
-      <div class="actions"><button class="primary" id="goSetupBtn">เริ่มตั้งทีม →</button><button class="soft" id="rulesBtn">ดูกติกา</button></div>
+      <p>ตัวแทนทีมเข้าห้องเกม ตั้งชื่อทีม แล้วช่วยกันตัดสินใจให้ธุรกิจรอดจาก Global Shock ทั้ง 20 ด่าน</p>
+      <div class="mini-rules">
+        <span>❤️ เริ่ม 100 HP</span><span>⏱️ 30 วินาที/ข้อ</span><span>💥 ตอบพลาด = เสีย HP</span>
+      </div>
     </div>
-    <div class="hero-art"><div class="orbit"></div><div class="globe">🌍<b>20 GLOBAL SHOCKS</b></div><span class="tag t1">🇺🇸 ภาษี</span><span class="tag t2">💵 ค่าเงิน</span><span class="tag t3">🚢 ขนส่ง</span><span class="tag t4">🤖 AI</span></div>
+    <div class="join-card card">
+      <div class="join-icon">🎮</div>
+      <h2>เข้าห้องเกม</h2>
+      <p>ใช้ 1 เครื่องต่อ 1 ทีม</p>
+      <form id="joinForm">
+        <label for="teamName">ชื่อทีม</label>
+        <input id="teamName" maxlength="28" autocomplete="off" placeholder="เช่น TEAM ROCKET" required>
+        <label for="roomCode">รหัสห้อง</label>
+        <input id="roomCode" maxlength="20" autocomplete="off" placeholder="เช่น MGT13167" required>
+        <button class="primary big" type="submit">⚡ เริ่มเกม</button>
+      </form>
+      <button class="link-btn" id="rulesBtn" type="button">ดูกติกาก่อนเล่น</button>
+    </div>
   </div>
 </section>
-<section id="setupScreen" class="screen">
-  <div class="setup-grid">
-    <div class="panel card"><h2>ตั้งค่าทีม</h2><p>แนะนำ 3–6 ทีม</p><label>จำนวนทีม<select id="teamCount"></select></label><div id="teamEditor"></div><div class="actions"><button class="primary" id="startGameBtn">⚡ เริ่มเกม</button><button class="soft" id="backHomeBtn">← กลับ</button></div></div>
-    <div class="panel card"><h2>กติกา</h2><div class="rules">
-      <div>❤️ <b>เริ่ม 100 HP</b><span>ทุกทีมมีพลังเท่ากัน</span></div>
-      <div>⏱️ <b>30 วินาทีต่อข้อ</b><span>คุยกันแล้วเลือก A / B / C / D</span></div>
-      <div>💥 <b>0 / -10 / -20 Damage</b><span>คำตอบเสี่ยงหรือผิดโดนดาเมจ</span></div>
-      <div>☠️ <b>0 HP = Business Failed</b><span>ยังเล่นต่อได้ แต่ขึ้นสถานะล้ม</span></div>
-      <div>🏆 <b>ครบ 20 ด่าน</b><span>HP สูงสุดชนะ</span></div>
-    </div></div>
-  </div>
-</section>
+
 <section id="gameScreen" class="screen">
-  <div class="game-grid">
-    <div class="question card">
-      <div class="question-head"><span id="roundPill" class="pill">EVENT 01 / 20</span><div id="timer" class="timer"><span id="timerText">30</span></div></div>
-      <div id="eventIcon" class="event-icon"></div><h2 id="questionTitle"></h2><p id="questionDesc"></p><div id="options" class="options"></div>
-      <div id="revealBanner" class="reveal"><div><b id="revealTitle"></b><span id="revealText"></span></div></div>
-      <div class="controls"><span id="statusNote">ให้แต่ละทีมเลือกคำตอบ</span><div><button class="soft" id="timerBtn">⏱ เริ่มเวลา</button><button class="pink" id="revealBtn">💥 REVEAL DAMAGE</button><button class="primary hidden" id="nextBtn">ด่านต่อไป →</button></div></div>
+  <div class="player-strip card">
+    <div class="identity"><span class="room-label">ROOM <b id="roomDisplay"></b></span><h3 id="teamDisplay"></h3></div>
+    <div class="hp-panel"><div class="hp-head"><span>❤️ พลังธุรกิจ</span><strong id="hpText">100 HP</strong></div><div class="hpbar large"><div id="hpFill" class="hpfill" style="width:100%"></div></div><small id="hpStatus">BUSINESS ACTIVE</small></div>
+  </div>
+
+  <div class="question card">
+    <div class="question-head">
+      <span id="roundPill" class="pill">EVENT 01 / 20</span>
+      <span id="questionState" class="state-pill">เลือกคำตอบก่อนหมดเวลา</span>
     </div>
-    <aside><div class="scorebox card"><h3>❤️ พลังธุรกิจ</h3><div id="teamScores"></div></div><div class="scorebox card"><h3>🎮 วิธีตอบ</h3><p>แต่ละทีมเลือก A / B / C / D แล้วครูกดคำตอบให้ทีมนั้น ครบทุกทีมค่อยกด REVEAL</p></div></aside>
+
+    <div class="timer-wrap" aria-label="เวลาคงเหลือ">
+      <div class="timer-meta"><span>⏱️ เวลาคงเหลือ</span><strong><span id="timerText">30</span> วินาที</strong></div>
+      <div class="timer-track"><div id="timerBar" class="timer-bar"></div></div>
+    </div>
+
+    <div class="event-area"><div id="eventIcon" class="event-icon"></div><div><h2 id="questionTitle"></h2><p id="questionDesc"></p></div></div>
+    <div id="options" class="options"></div>
+
+    <div id="resultBox" class="result-box" aria-live="polite">
+      <div id="resultIcon" class="result-icon"></div>
+      <div class="result-copy"><span id="resultKicker"></span><h3 id="resultTitle"></h3><p id="resultFeedback"></p></div>
+      <div id="damageBadge" class="damage-badge"></div>
+    </div>
+
+    <div class="controls"><span id="statusNote">คุยกับสมาชิกในทีม แล้วเลือก 1 คำตอบ</span><button class="primary hidden" id="nextBtn" type="button">ข้อต่อไป →</button></div>
   </div>
 </section>
+
 <section id="resultScreen" class="screen">
-  <div class="results-grid"><div class="panel card"><span class="eyebrow">🏁 FINAL RESULT</span><h2>ธุรกิจไหนรอดดีที่สุด?</h2><div id="rankList"></div><div class="actions"><button class="primary" id="playAgainBtn">↻ เล่นใหม่</button></div></div><div class="winner card"><div>🏆</div><small>BUSINESS SURVIVOR</small><h2 id="winnerName"></h2><p id="winnerHp"></p><div id="confetti"></div></div></div>
+  <div class="finish card">
+    <div class="trophy">🏆</div>
+    <span class="eyebrow">GAME COMPLETE</span>
+    <h1 id="finishTitle">จบเกมแล้ว!</h1>
+    <p>ทีม <strong id="finishTeam"></strong> · ห้อง <strong id="finishRoom"></strong></p>
+    <div class="final-hp"><span>HP ที่เหลือ</span><strong id="finishHp">0</strong></div>
+    <div id="finishStatus" class="finish-status"></div>
+    <p class="finish-note">แสดงหน้าจอนี้ให้ผู้สอนเพื่อเทียบคะแนนกับทีมอื่น</p>
+    <button class="primary big" id="playAgainBtn" type="button">↻ เล่นใหม่</button>
+  </div>
 </section>
 </main>
 </div>
-<div id="rulesModal" class="modal-wrap"><div class="modal card"><h2>กติกา BUSINESS SURVIVAL</h2><p>ทุกทีมเริ่ม 100 HP เลือก A/B/C/D แล้วกด Reveal เพื่อดูผลพร้อมกัน</p><div class="rules"><div>🟢 <b>NICE MOVE — 0 Damage</b><span>รับมือได้เหมาะสม</span></div><div>🟠 <b>OUCH — -10 HP</b><span>พอทำได้ แต่ยังเสี่ยง</span></div><div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุดหรือทำให้ปัญหาหนักขึ้น</span></div></div><div class="actions end"><button class="primary" id="closeRulesBtn">เข้าใจแล้ว</button></div></div></div>
-<div id="damageModal" class="modal-wrap"><div class="modal card"><h2 id="damageModalTitle">ผลการตัดสินใจ</h2><p id="damageModalExplain"></p><div id="teamResults"></div><div class="actions end"><button class="primary" id="closeDamageBtn">ดู HP หลังโดนดาเมจ</button></div></div></div>
+
+<div id="rulesModal" class="modal-wrap">
+  <div class="modal card">
+    <h2>กติกา BUSINESS SURVIVAL</h2>
+    <p>1 เครื่องต่อ 1 ทีม ช่วยกันตอบคำถาม 20 ด่าน แต่ละข้อมีเวลา 30 วินาที</p>
+    <div class="rules">
+      <div>🟢 <b>NICE MOVE — 0 Damage</b><span>รับมือเหมาะสม ธุรกิจไม่เสีย HP</span></div>
+      <div>🟠 <b>OUCH — -10 HP</b><span>พอทำได้ แต่ยังไม่ใช่ทางที่ดีนัก</span></div>
+      <div>🔴 <b>CRITICAL HIT — -20 HP</b><span>แก้ไม่ตรงจุด หรือไม่ตอบก่อนหมดเวลา</span></div>
+      <div>☠️ <b>0 HP = BUSINESS FAILED</b><span>ยังตอบต่อได้เพื่อเรียนรู้ให้ครบ 20 ด่าน</span></div>
+    </div>
+    <div class="actions end"><button class="primary" id="closeRulesBtn" type="button">เข้าใจแล้ว</button></div>
+  </div>
+</div>
+
 <script src="questions.js"></script>
 <script src="game.js"></script>
 </body>
